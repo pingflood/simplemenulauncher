@@ -44,15 +44,17 @@
 #define MAX_NAME_SIZE 64
 #define MAX_ELEMENTS 128
 
-SDL_Surface *screen;
+SDL_Surface *screen, *backbuffer;
 SDL_Surface *backbuffer;
-SDL_Surface* img;
-SDL_Surface* font_bmp;
-SDL_Surface* font_bmp_small;
+SDL_Surface *img, *font_bmp, *font_bmp_small;
 
-uint8_t button_time[20];
-uint8_t button_state[20];
+uint8_t button_time[20], button_state[20];
+
+/* Global buffer used to store temporarely the text files, 
+* i would like to avoid pointers whenever possible...
+*/
 uint8_t* buf;
+/* Used to determine whetever we should shutdown, execute app etc..*/
 uint8_t err;
 
 #define COLOR_BG           	SDL_MapRGB(backbuffer->format,5,3,2)
@@ -72,10 +74,8 @@ struct file_struct
 	uint16_t real_clock_speed;
 	SDL_Surface* icon;
 } ;
-
-struct file_struct apps[MAX_ELEMENTS];
-struct file_struct games[MAX_ELEMENTS];
-struct file_struct emus[MAX_ELEMENTS];
+struct file_struct apps[MAX_ELEMENTS], games[MAX_ELEMENTS], emus[MAX_ELEMENTS];
+/* They are not inside the structure to avoid duplication and memory waste */
 uint16_t emus_totalsize, games_totalsize, apps_totalsize;
 
 uint8_t* loop(uint8_t* name, uint32_t* lastpos)
@@ -93,53 +93,30 @@ uint8_t* loop(uint8_t* name, uint32_t* lastpos)
 		}
 	}
 	
-	// 226 is € and it basically means "ignore" in our case
+	// Looks for big character 'K', if found then it means that there's nothing to copy
 	if (name[0] == 'K') name[0] = '\0';
 
 	return name;
 }
 
-uint8_t* extension(uint8_t* name, uint32_t* lastpos)
-{
-	uint32_t i, a;
-	uint8_t tmp[32];
-	for(a=*lastpos;a<*lastpos+MAX_NAME_SIZE;a++)
-	{
-		snprintf(tmp, MAX_NAME_SIZE, "%s", name);
-		snprintf(name, MAX_NAME_SIZE, "%s%c", tmp, buf[a]);
-		if (buf[a+1] == '\n')
-		{
-			*lastpos = a + 2;
-			break;
-		}
-	}
-	return name;
-}
-
-void Fill_Element(int sz, struct file_struct* tocopy, uint16_t* totalsize)
+/* Using a local struct was prone to bugs for some reasons (?) so we'll pass everything through a pointer. */
+void Fill_Element(int sz, struct file_struct* example, uint16_t* totalsize)
 {
 	uint32_t i, a, e;
+	/* This is used to walk though the file, one entry at a time */
 	uint32_t lastpos = 0;
 	uint8_t tmp[32];
 	uint32_t totalsz;
-	
-	//struct file_struct* example = (struct file_struct*) emus;
-	struct file_struct example[MAX_ELEMENTS];
-	//struct file_struct* tocopy = (struct file_struct*) emus;
 	
 	for(e=0;e<MAX_ELEMENTS;e++)
 	{
 		if (lastpos >= sz) 
 		{
 			*totalsize = totalsz = e;
-			printf("END OF FILE\n");
 			break;
 		}
 		
 		sprintf(example[e].name, "%s", loop(example[e].name, &lastpos));
-		
-		printf("Name %s\n", example[e].name);
-		
 		sprintf(example[e].description, "%s", loop(example[e].description, &lastpos));
 		sprintf(example[e].executable_path, "%s", loop(example[e].executable_path, &lastpos));
 		sprintf(example[e].yes_search, "%s", loop(example[e].yes_search, &lastpos));
@@ -166,8 +143,6 @@ void Fill_Element(int sz, struct file_struct* tocopy, uint16_t* totalsize)
 		}
 
 		sprintf(example[e].commandline, "%s", loop(example[e].commandline, &lastpos));
-		printf("example[e].commandline %d\n", example[e].commandline[0]);
-		
 		sprintf(example[e].icon_path, "%s", loop(example[e].icon_path, &lastpos));
 		
 		example[e].icon = Load_Image(example[e].icon_path);
@@ -177,38 +152,72 @@ void Fill_Element(int sz, struct file_struct* tocopy, uint16_t* totalsize)
 		example[e].real_clock_speed = strtol (loop(example[e].clock_speed, &lastpos),NULL,10);
 		lastpos += 4;
 	}
+}
+
+//void list_apps(struct file_struct
+
+/* We probably need a better way than a hardcoded switch for only 3 categories */
+uint16_t Load_Files(uint8_t caca)
+{
+	FILE* fp;
+	uint32_t sz = 0;
+	uint16_t totalsize = 0;
 	
-	for(i=0;i<totalsz;i++)
+	if (buf)
 	{
-		sprintf(tocopy[i].name, "%s", example[i].name);
-		sprintf(tocopy[i].description, "%s", example[i].description);
-		sprintf(tocopy[i].executable_path, "%s", example[i].executable_path);
-		sprintf(tocopy[i].yes_search, "%s", example[i].yes_search);
-		
-		for(e=0;e<16;e++)
-		{
-			snprintf(tocopy[i].ext[e], MAX_NAME_SIZE, "%s", example[i].ext[e]);
-		}
-		
-		tocopy[i].howmuchext = example[i].howmuchext;
-		
-		sprintf(tocopy[i].commandline, "%s", example[i].commandline);
-		sprintf(tocopy[i].icon_path, "%s", example[i].icon_path);
-		
-		tocopy[i].icon = example[i].icon;
-		tocopy[i].howmuchext = example[i].howmuchext;
-		
-		// Atoi alternative
-		//example[i].real_clock_speed = atoi(loop(example[i].clock_speed, &lastpos));
-		tocopy[i].real_clock_speed  = example[i].real_clock_speed;
+		free(buf);
+		buf = NULL;
 	}
+	
+	switch(caca)
+	{
+		case 0:
+			fp = fopen("./apps", "r");
+			if (fp)
+			{
+				fseek(fp, 0L, SEEK_END);
+				sz = ftell(fp);
+				buf = malloc(sz);
+				fseek(fp, 0L, 0);
+				fread(buf, sizeof(uint8_t), sz, fp);
+				fclose(fp);
+				Fill_Element(sz, apps, &totalsize);
+			}
+		break;
+		case 1:
+			fp = fopen("./emus", "r");
+			if (fp)
+			{
+				fseek(fp, 0L, SEEK_END);
+				sz = ftell(fp);
+				buf = malloc(sz);
+				fseek(fp, 0L, 0);
+				fread(buf, sizeof(uint8_t), sz, fp);
+				fclose(fp);
+				Fill_Element(sz, emus, &totalsize);
+			}
+		break;
+		case 2:
+			fp = fopen("./games", "r");
+			if (fp)
+			{
+				fseek(fp, 0L, SEEK_END);
+				sz = ftell(fp);
+				buf = malloc(sz);
+				fseek(fp, 0L, 0);
+				fread(buf, sizeof(uint8_t), sz, fp);
+				fclose(fp);
+				Fill_Element(sz, games, &totalsize);
+			}
+		break;
+	}
+
+	return totalsize;
 }
 
 
 int32_t main(int32_t argc, int8_t* argv[]) 
 {
-	FILE* fp;
-	uint32_t sz;
 	uint8_t tmp[32];
 	uint8_t temp_string[512];
 	uint8_t additional_file[512];
@@ -235,32 +244,9 @@ int32_t main(int32_t argc, int8_t* argv[])
 	
 	SDL_WM_SetCaption(TITLE_WINDOW, NULL);
 	
-	fp = fopen("./emus", "r");
-	fseek(fp, 0L, SEEK_END);
-	sz = ftell(fp);
-	buf = malloc(sz);
-	fseek(fp, 0L, 0);
-	fread(buf, sizeof(char), sz, fp);
-	fclose(fp);
-	
-	Fill_Element(sz, emus, &emus_totalsize);
-	
-	for(i=0;i<emus_totalsize;i++)
-	{
-		printf("Name : %s\n", emus[i].name);
-		printf("Description : %s\n", emus[i].description);
-		printf("Executable Path : %s\n", emus[i].executable_path);
-		printf("Yes search : %s\n", emus[i].yes_search);
-		
-		for(e=0;e<emus[i].howmuchext;e++)
-		{
-			printf("Extensions : %s\n", emus[i].ext[e]);
-		}
-			
-		printf("Commandline : %s\n", emus[i].commandline);
-		printf("Icon path : %s\n", emus[i].icon_path);
-		printf("Clock speed : %d\n", emus[i].real_clock_speed);
-	}
+	apps_totalsize = Load_Files(0);
+	emus_totalsize = Load_Files(1);
+	games_totalsize = Load_Files(2);
 	
 	while (button_state[6] == 0) 
 	{
@@ -276,7 +262,7 @@ int32_t main(int32_t argc, int8_t* argv[])
 			Print_text(font_bmp_small, 50,25+(39*i), emus[list+i].description, COLOR_INACTIVE_ITEM, 8);
 		}
 		
-		if (button_state[0] == 1) 
+		if (button_state[0] > 0) 
 		{
 			if (select == 0 && list > 0)
 			{
@@ -288,7 +274,7 @@ int32_t main(int32_t argc, int8_t* argv[])
 				select--;
 			}
 		}
-		else if (button_state[1]  == 1)
+		else if (button_state[1]  > 0)
 		{
 			if (select > 4)
 			{

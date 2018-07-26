@@ -8,8 +8,6 @@ and execute them according to their own settings.
 TODO
 ====
 
-USB Mounting support
-
 Scroll through the 2 other categories
 
 Add another category for settings
@@ -17,3 +15,13 @@ Add another category for settings
 Add support for the brightness button (adjustable brightness)
 
 Add file browser for emulators
+
+
+Ticked off the list
+====================
+
+TV Out support
+
+SD Card mounting
+
+USB mounting

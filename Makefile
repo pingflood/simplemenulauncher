@@ -14,7 +14,7 @@ CFLAGS = $(DEFINES) $(INCLUDES) $(OPT_FLAGS) -std=gnu11
 LDFLAGS = -lSDL -lSDL_image
 
 # Redream (main engine)
-OBJS =  main.o graphics.o
+OBJS =  main.o graphics.o rs97.o
  
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $< 

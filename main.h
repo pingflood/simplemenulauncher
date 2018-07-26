@@ -1,3 +1,6 @@
+#ifndef _MAIN_H
+#define _MAIN_H
+
 #define MAX_LENGH 2048
 
 #define TITLE_WINDOW "Simple Menu Launcher"
@@ -33,6 +36,8 @@
 #define PAD_DELETE		keystate[SDLK_BACKSPACE]
 #define PAD_QUIT		keystate[SDLK_ESCAPE]
 
+#define PAD_QUIT		keystate[SDLK_ESCAPE]
+
 void init (void);
 void controls ();
 
@@ -47,3 +52,5 @@ void remove_file();
 uint8_t clear_dir(int8_t* which_dir);
 
 void set_fileid();
+
+#endif

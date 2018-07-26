@@ -39,6 +39,7 @@
 #include <SDL/SDL.h>
 #include "main.h"
 #include "graphics.h"
+#include "rs97.h"
 
 #define OUR_PATH_MAX 512
 #define MAX_NAME_SIZE 64
@@ -59,6 +60,7 @@ uint8_t err;
 
 #define COLOR_BG           	SDL_MapRGB(backbuffer->format,5,3,2)
 #define COLOR_INACTIVE_ITEM SDL_MapRGB(backbuffer->format,255,255,255)
+#define COLOR_SELECT           	SDL_MapRGB(backbuffer->format,0,0,255)
 
 struct file_struct
 {
@@ -215,6 +217,57 @@ uint16_t Load_Files(uint8_t caca)
 	return totalsize;
 }
 
+void Display_Files(int32_t* listi, struct file_struct* structure_file)
+{
+	uint8_t i;
+	/* Our launcher is going to be list-based for now and we can only display 6 entries
+	 * so let's not overdraw */
+	for(i=0;i<6;i++)
+	{
+		if (structure_file[*listi+i].icon) Put_image(structure_file[*listi+i].icon, 8, 4+(39*i));
+		Print_text(font_bmp, 50,1+(39*i), structure_file[*listi+i].name, COLOR_INACTIVE_ITEM, 16);
+		Print_text(font_bmp_small, 50,25+(39*i), structure_file[*listi+i].description, COLOR_INACTIVE_ITEM, 8);
+	}
+}
+
+uint8_t prompt(uint8_t* text, uint8_t* yes_text, uint8_t* no_text)
+{
+	uint8_t done;
+	done = 0;
+	/* Reset input values to 2 (aka UP, just in case) */
+	button_state[4] = 0;
+	button_state[8] = 0;
+	while (done == 0) 
+	{
+		controls();
+		SDL_BlitSurface(img, NULL, backbuffer, NULL);
+		Draw_Rect(backbuffer, 56, 24, 224, 96, COLOR_SELECT);
+		Print_text(font_bmp, 72,32, text, COLOR_INACTIVE_ITEM, 16);
+		Print_text(font_bmp, 64,64, yes_text, COLOR_INACTIVE_ITEM, 16);
+		Print_text(font_bmp, 64,96, no_text, COLOR_INACTIVE_ITEM, 16);
+		if (button_state[4] == 1) done = 1;
+		else if (button_state[8] == 1) done = 2;
+		SDL_SoftStretch(backbuffer, NULL, screen, NULL);
+		SDL_Flip(screen);
+	}
+	return done;
+}
+
+void USB_Mount_Loop()
+{
+	uint8_t done;
+	while (done == 1) 
+	{
+		controls();
+		SDL_BlitSurface(img, NULL, backbuffer, NULL);
+		Draw_Rect(backbuffer, 56, 24, 224, 96, COLOR_SELECT);
+		Print_text(font_bmp, 80,64, "USB MOUNTED", COLOR_INACTIVE_ITEM, 16);
+		if (button_state[5] == 1 || button_state[6] == 1 || getUDCStatus() != UDC_CONNECT) done = 0;
+		SDL_SoftStretch(backbuffer, NULL, screen, NULL);
+		SDL_Flip(screen);
+	}
+}
+
 
 int32_t main(int32_t argc, int8_t* argv[]) 
 {
@@ -225,10 +278,8 @@ int32_t main(int32_t argc, int8_t* argv[])
 	uint32_t lastpos = 0;
 	int32_t select = 0;
 	int32_t list = 0;
-	
-	SDL_Rect position;
-	position.x = 0;
-	position.y = 0;
+
+	atexit(SDL_Quit);
 
 	if (!SDL_WasInit(SDL_INIT_VIDEO))
 	{
@@ -248,19 +299,19 @@ int32_t main(int32_t argc, int8_t* argv[])
 	emus_totalsize = Load_Files(1);
 	games_totalsize = Load_Files(2);
 	
+	USB_Mount();
+	
 	while (button_state[6] == 0) 
 	{
 		controls();
 		
-		SDL_BlitSurface(img, NULL, backbuffer, &position);
+		TV_Out();
+		SD_Mount();
+		
+		SDL_BlitSurface(img, NULL, backbuffer, NULL);
 		Draw_Rect(backbuffer, 0, select*38, 320, 39, 500);
-			
-		for(i=0;i<6;i++)
-		{
-			if (emus[list+i].icon) Put_image(emus[list+i].icon, 8, 4+(39*i));
-			Print_text(font_bmp, 50,1+(39*i), emus[list+i].name, COLOR_INACTIVE_ITEM, 16);
-			Print_text(font_bmp_small, 50,25+(39*i), emus[list+i].description, COLOR_INACTIVE_ITEM, 8);
-		}
+		
+		Display_Files(&list, emus);
 		
 		if (button_state[0] > 0) 
 		{

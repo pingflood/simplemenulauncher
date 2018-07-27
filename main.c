@@ -16,18 +16,6 @@
   0. You just DO WHAT THE FUCK YOU WANT TO.
 */
 
-/*
- * INCOMING : HUGE MESS ! 
- * 
-*/
-
-/*
- * nFile Browser 
- * Simple file browser mainly targetting the TI nspire using SDL/n2DLib.
- * It can also be used on other platforms as a simple file browser.
- * On TI Nspire, it can launch Ndless applications. (only using the SDL port though)
-*/
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -37,48 +25,34 @@
 #include <sys/stat.h>
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 #include "main.h"
 #include "graphics.h"
 #include "rs97.h"
-
-#define OUR_PATH_MAX 512
-#define MAX_NAME_SIZE 64
-#define MAX_ELEMENTS 128
+#include "browser.h"
 
 SDL_Surface *screen, *backbuffer;
-SDL_Surface *backbuffer;
 SDL_Surface *img, *font_bmp, *font_bmp_small;
+TTF_Font *gFont;
 
 uint8_t button_time[20], button_state[20];
 
 /* Global buffer used to store temporarely the text files, 
-* i would like to avoid pointers whenever possible...
+* i would like to avoid dealing with pointers as much as possible...
 */
-uint8_t* buf;
+uint8_t *buf, *cwdbuf;
 /* Used to determine whetever we should shutdown, execute app etc..*/
 uint8_t err;
 
-#define COLOR_BG           	SDL_MapRGB(backbuffer->format,5,3,2)
-#define COLOR_INACTIVE_ITEM SDL_MapRGB(backbuffer->format,255,255,255)
-#define COLOR_SELECT           	SDL_MapRGB(backbuffer->format,0,0,255)
+/* used to store our selection in the menu's browser */
+int32_t select_menu = 0, list_menu = 0;
+uint8_t additional_file[MAX_NAME_SIZE];
 
-struct file_struct
-{
-	uint8_t name[MAX_NAME_SIZE];
-	uint8_t description[MAX_NAME_SIZE];
-	uint8_t executable_path[OUR_PATH_MAX];
-	uint8_t yes_search[2];
-	uint8_t ext[16][MAX_NAME_SIZE];
-	uint8_t howmuchext;
-	uint8_t commandline[MAX_NAME_SIZE];
-	uint8_t icon_path[OUR_PATH_MAX];
-	uint8_t clock_speed[4];
-	uint16_t real_clock_speed;
-	SDL_Surface* icon;
-} ;
+int8_t* currentdir;
 struct file_struct apps[MAX_ELEMENTS], games[MAX_ELEMENTS], emus[MAX_ELEMENTS];
 /* They are not inside the structure to avoid duplication and memory waste */
 uint16_t emus_totalsize, games_totalsize, apps_totalsize;
+
 
 uint8_t* loop(uint8_t* name, uint32_t* lastpos)
 {
@@ -156,9 +130,12 @@ void Fill_Element(int sz, struct file_struct* example, uint16_t* totalsize)
 	}
 }
 
-//void list_apps(struct file_struct
-
-/* We probably need a better way than a hardcoded switch for only 3 categories */
+/* We probably need a better way than a hardcoded switch for only 3 categories 
+ * TODO : Add failsafe in case it does not sucessfully load the file. (either because the file is invalid, write-only or non-existant)
+ * In that case, we would need to load hardcoded ones (in a header file, const arrays of course) generated with each release.
+ * At least, i won't get complains about "Y LAUNCHER BROKE AFTER APPLYING SERVICE PACK???" because that crap known as the RS-97
+ * corrupted the file "en route". It should still allowing them to add external apps. (even though they are not recommended)
+ * */
 uint16_t Load_Files(uint8_t caca)
 {
 	FILE* fp;
@@ -234,9 +211,9 @@ uint8_t prompt(uint8_t* text, uint8_t* yes_text, uint8_t* no_text)
 {
 	uint8_t done;
 	done = 0;
-	/* Reset input values to 2 (aka UP, just in case) */
-	button_state[4] = 0;
-	button_state[8] = 0;
+	/* Reset input values to 2 (aka HELD, just in case) */
+	button_state[4] = 2;
+	button_state[8] = 2;
 	while (done == 0) 
 	{
 		controls();
@@ -273,21 +250,33 @@ int32_t main(int32_t argc, int8_t* argv[])
 {
 	uint8_t tmp[32];
 	uint8_t temp_string[512];
-	uint8_t additional_file[512];
 	uint32_t i, a, e;
 	uint32_t lastpos = 0;
-	int32_t select = 0;
-	int32_t list = 0;
+	uint8_t done = 0;
 
-	atexit(SDL_Quit);
+	/* Now, these environment variables are supposed to be set through sh.
+	 * But what happens if those lines get removed or are incorrectly modified ? Well you're screwed, simple.
+	 * Because without those, most apps won't work, such as FBA GCW0 for example.
+	 * There are 7 billions of humans on earth, one of them is going to screw the file and ask why it broke.
+	 * */
+	setenv("SDL_NOMOUSE", "1", 1);
+	setenv("HOME", "/mnt/int_sd", 1);
 
 	if (!SDL_WasInit(SDL_INIT_VIDEO))
 	{
 		SDL_Init(SDL_INIT_VIDEO);
 	}
-	screen = SDL_SetVideoMode(640, 480, 16, SDL_HWSURFACE ); 
+	
+	/* The RS-97 has a crappy screen of 320x480, but with an aspect ratio of 4:3.
+	 * Thus, we need to render to a buffer and scale it before renderin to the screen.
+	 * */
+	screen = SDL_SetVideoMode(320, 480, 16, SDL_HWSURFACE ); 
 	backbuffer = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 16, 0, 0, 0, 0);
 	SDL_ShowCursor(SDL_DISABLE);
+	
+	TTF_Init();
+	gFont = TTF_OpenFont( "font.ttf", 10 );
+	TTF_SetFontStyle(gFont, TTF_STYLE_NORMAL);
 	
 	img = Load_Image("background.bmp");
 	font_bmp = Load_Image("font.png");
@@ -301,57 +290,77 @@ int32_t main(int32_t argc, int8_t* argv[])
 	
 	USB_Mount();
 	
-	while (button_state[6] == 0) 
-	{
-		controls();
-		
-		TV_Out();
-		SD_Mount();
-		
-		SDL_BlitSurface(img, NULL, backbuffer, NULL);
-		Draw_Rect(backbuffer, 0, select*38, 320, 39, 500);
-		
-		Display_Files(&list, emus);
-		
-		if (button_state[0] > 0) 
-		{
-			if (select == 0 && list > 0)
-			{
-				list = list - 5;
-				select = 5;
-			}
-			else if (select > 0) 
-			{
-				select--;
-			}
-		}
-		else if (button_state[1]  > 0)
-		{
-			if (select > 4)
-			{
-				list = list + 5;
-				select = 0;
-			}
-			else if (select < 5)
-			{
-				if (!((select+list)+2 > emus_totalsize))
-				select++;
-			}
-		}
-		
-		if (button_state[4] == 1) 
-		{
-			button_state[6] = 1;
-			err = 1;
-		}
-		
-		SDL_SoftStretch(backbuffer, NULL, screen, NULL);
-		SDL_Flip(screen);
-		
-		SDL_Delay(50);
-		
-	}
+	currentdir = getcwd(cwdbuf, 512);
 
+	list_all_files(currentdir,emus);
+	
+	while (done == 0) 
+	{
+		while (done == 0) 
+		{
+			controls();
+			
+			TV_Out();
+			SD_Mount();
+			
+			SDL_BlitSurface(img, NULL, backbuffer, NULL);
+			Draw_Rect(backbuffer, 0, select_menu*38, 320, 39, 500);
+			Display_Files(&list_menu, emus);
+			
+			if (button_state[0] == 1) 
+			{
+				if (select_menu == 0 && list_menu > 0)
+				{
+					list_menu = list_menu - 5;
+					select_menu = 5;
+				}
+				else if (select_menu > 0) 
+				{
+					select_menu--;
+				}
+			}
+			else if (button_state[1]  == 1)
+			{
+				if (select_menu > 4)
+				{
+					list_menu = list_menu + 5;
+					select_menu = 0;
+				}
+				else if (select_menu < 5)
+				{
+					if (!((select_menu+list_menu)+2 > emus_totalsize))
+					select_menu++;
+				}
+			}
+			
+			if (button_state[4] == 1) 
+			{
+				done = 1;
+				err = 1;
+			}
+			
+			/* Shutdown */
+			if (button_state[12] == 1) 
+			{
+				err = Shutdown();
+				if (err == 2 || err == 3) done = 1;
+			}
+			
+			SDL_SoftStretch(backbuffer, NULL, screen, NULL);
+			SDL_Flip(screen);
+			
+			SDL_Delay(20);
+		}
+		
+		if (emus[select_menu+list_menu].yes_search[0] == 'y' && (err == 1 || err == 4))
+		{
+			/* Refresh again */
+			list_all_files(currentdir,emus);
+			err = File_Browser_file(emus);
+		}
+		
+		if (err == 0) done = 0;
+	}
 
 	if (backbuffer != NULL) SDL_FreeSurface(backbuffer);
 	if (screen != NULL) SDL_FreeSurface(screen);
@@ -370,14 +379,20 @@ int32_t main(int32_t argc, int8_t* argv[])
 			snprintf(temp_string, MAX_LENGH, "exec /sbin/poweroff");
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
-		/* Executes the executable */
+		/* Launch the executable 
+		 * It's important that we also need to parse the command line switch.
+		 * Sure, we could have used an sh file for that but they like being corrupted too...
+		 * They should be avoided whetever possible. This one is most suited for games.
+		 * */
 		case 1:
-			snprintf(temp_string, MAX_LENGH, "%s %s", emus[select+list].executable_path, emus[select+list].commandline);
+			snprintf(temp_string, MAX_LENGH, "%s %s", emus[select_menu+list_menu].executable_path, emus[select_menu+list_menu].commandline);
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
-		/* Asks for file to execute */
+		/* Same, except that we also need to parse the additional file.
+		 * Emulators are the most likely to make use of this, followed by game engines and apps like ffplay.
+		 * */
 		case 4:
-			snprintf(temp_string, MAX_LENGH, "%s %s %s", emus[select+list].executable_path, emus[select+list].commandline , additional_file);
+			snprintf(temp_string, MAX_LENGH, "%s %s %s", emus[select_menu+list_menu].executable_path, emus[select_menu+list_menu].commandline , additional_file);
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
 	}
@@ -438,6 +453,18 @@ void controls()
 			break;
 			case 8:
 			pad = PAD_CANCEL;
+			break;
+			case 9:
+			pad = PAD_LEFT_SHOULDER;
+			break;
+			case 10:
+			pad = PAD_RIGHT_SHOULDER;
+			break;
+			case 11:
+			pad = PAD_BRIGHTNESS;
+			break;
+			case 12:
+			pad = PAD_HOME;
 			break;
 		}
 		

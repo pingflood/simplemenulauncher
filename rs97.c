@@ -73,9 +73,7 @@ void SD_Mount()
 }
 
 /* Right now, it is only executed at boot (because that's where it is the most reliable.
- * If you force reboot the console
- * 
- * 
+ * It might still launch again though... perhaps use an environment variable to prevent this ?
  *  */
 void USB_Mount()
 {
@@ -83,7 +81,10 @@ void USB_Mount()
 	
 	/* Do not prompt about USB if it's not plugged in */
 	if (getUDCStatus() != UDC_CONNECT)
+	{
+		printf("getUDCStatus() %d (2=ERROR, 0=Non existant)\n", getUDCStatus());
 		return;
+	}
 		
 	done = prompt("MOUNT USB ?", "A BUTTON: YES", "B BUTTON: NO");
 	
@@ -156,4 +157,19 @@ void TV_Out()
 			break;
 		}
 	}
+}
+
+
+uint8_t Shutdown()
+{
+	uint8_t done;
+	done = prompt("SHUTDOWN?", "A BUTTON: YES", "B BUTTON: NO");
+	if (done == 1) return 3;
+	else
+	{
+		done = prompt("REBOOT THEN?", "A BUTTON: YES", "B BUTTON: NO");
+		if (done == 1) return 2;
+	}
+	
+	return 0;
 }

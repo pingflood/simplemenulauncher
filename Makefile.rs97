@@ -1,0 +1,29 @@
+#
+# Makefile for Linux
+# It's mostly for conveniance and also so i don't have to recompile SDL2 each time.
+#
+
+CC = /opt/rs97-toolchain/bin/mipsel-linux-gcc
+OUTPUTNAME = smenu.elf
+
+DEFINES = 
+INCLUDES = -I.
+OPT_FLAGS  = -Os -s
+
+CFLAGS = $(DEFINES) $(INCLUDES) $(OPT_FLAGS) -std=gnu11 
+LDFLAGS = -lSDL -lSDL_image -lSDL_ttf
+
+# Redream (main engine)
+OBJS =  main.o graphics.o rs97.o browser.o
+ 
+.c.o:
+	$(CC) $(CFLAGS) -c -o $@ $< 
+	
+
+all: executable
+
+executable : $(OBJS)
+	$(CC) -o $(OUTPUTNAME) $(OBJS) $(CFLAGS) $(LDFLAGS)
+
+clean:
+	rm $(OBJS) $(OUTPUTNAME)

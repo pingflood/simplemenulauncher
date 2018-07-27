@@ -24,6 +24,7 @@ extern void USB_Mount();
 extern void TV_Out();
 extern void USB_Mount_Loop();
 extern int16_t getUDCStatus();
+extern uint8_t Shutdown();
 
 extern uint8_t prompt(uint8_t* text, uint8_t* yes_text, uint8_t* no_text);
 

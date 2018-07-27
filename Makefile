@@ -11,10 +11,10 @@ INCLUDES = -I.
 OPT_FLAGS  = -O0 -g
 
 CFLAGS = $(DEFINES) $(INCLUDES) $(OPT_FLAGS) -std=gnu11 
-LDFLAGS = -lSDL -lSDL_image
+LDFLAGS = -lSDL -lSDL_image -lSDL_ttf
 
 # Redream (main engine)
-OBJS =  main.o graphics.o rs97.o
+OBJS =  main.o graphics.o rs97.o browser.o
  
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $< 

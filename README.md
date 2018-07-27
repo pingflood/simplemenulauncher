@@ -14,8 +14,6 @@ Add another category for settings
 
 Add support for the brightness button (adjustable brightness)
 
-Add file browser for emulators
-
 
 Ticked off the list
 ====================
@@ -25,3 +23,5 @@ TV Out support
 SD Card mounting
 
 USB mounting
+
+Add file browser for emulators (That took me a while but it's mostly done)

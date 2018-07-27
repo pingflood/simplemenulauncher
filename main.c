@@ -245,11 +245,146 @@ void USB_Mount_Loop()
 	}
 }
 
+struct file_struct* SetMenu(uint8_t cc, uint16_t* tot)
+{
+	switch(cc)
+	{
+		case 0:
+		default:
+			*tot = apps_totalsize;
+			return apps;
+		break;
+		case 1:
+			*tot = emus_totalsize;
+			return emus;
+		break;
+		case 2:
+			*tot = games_totalsize;
+			return games;
+		break;
+	}
+}
+
+void MenuBrowser(uint8_t *done)
+{
+	static uint8_t state_b[2];
+	static uint8_t time_b[2];
+	static uint8_t select_cat = 0;
+	static uint16_t struct_totalsize = 0;
+	uint8_t i;
+	
+	struct file_struct* structure_file;
+	structure_file = SetMenu(0, &struct_totalsize);
+	
+	list_all_files(currentdir,structure_file);
+	
+	while (*done == 0) 
+	{
+		while (*done == 0) 
+		{
+			controls();
+					
+			TV_Out();
+			SD_Mount();
+					
+			/* Hopefully this won't make it fly...*/
+			for(i=0;i<2;i++)
+			{
+				if (button_state[i] == 2)
+				{
+					time_b[i]++;
+					if (time_b[i] > 3)
+						state_b[i] = 1;
+					if (time_b[i] > 4)
+					{
+						state_b[i] = 0;
+						time_b[i] = 0;
+					}
+				}
+				else
+				{
+					state_b[i] = 0;
+					time_b[i] = 0;
+				}
+			}
+					
+			SDL_BlitSurface(img, NULL, backbuffer, NULL);
+			Draw_Rect(backbuffer, 0, select_menu*38, 320, 39, 500);
+			Display_Files(&list_menu, structure_file);
+			
+			/* L shoulder */
+			if (button_state[9] == 1)
+			{
+				if (select_cat > 0) select_cat--;
+				structure_file = SetMenu(select_cat, &struct_totalsize);
+			}
+			/* R shoulder */
+			else if (button_state[10] == 1)
+			{
+				if (select_cat < 2) select_cat++;
+				structure_file = SetMenu(select_cat, &struct_totalsize);
+			}
+					
+			if (button_state[0] == 1 || state_b[0] == 1) 
+			{
+				if (select_menu == 0 && list_menu > 0)
+				{
+					list_menu = list_menu - 5;
+					select_menu = 5;
+				}
+				else if (select_menu > 0) 
+				{
+					select_menu--;
+				}
+			}
+			else if (button_state[1] == 1 || state_b[1] == 1) 
+			{
+				if (select_menu > 4)
+				{
+					list_menu = list_menu + 5;
+					select_menu = 0;
+				}
+				else if (select_menu < 5)
+				{
+					if (!((select_menu+list_menu)+2 > struct_totalsize))
+					select_menu++;
+				}
+			}
+					
+			if (button_state[4] == 1) 
+			{
+				*done = 1;
+				err = 1;
+			}
+					
+			/* Shutdown */
+			if (button_state[12] == 1) 
+			{
+				err = Shutdown();
+				if (err == 2 || err == 3) *done = 1;
+			}
+					
+			SDL_SoftStretch(backbuffer, NULL, screen, NULL);
+			SDL_Flip(screen);
+			Limit_FPS();
+		}
+		
+		if (emus[select_menu+list_menu].yes_search[0] == 'y' && (err == 1 || err == 4))
+		{
+			/* Refresh again */
+			list_all_files(currentdir,structure_file);
+			err = File_Browser_file(structure_file);
+		}
+			
+		if (err == 0) *done = 0;
+	}
+}
+
 
 int32_t main(int32_t argc, int8_t* argv[]) 
 {
 	uint8_t tmp[32];
-	uint8_t temp_string[512];
+	uint8_t temp_string[128];
 	uint32_t i, a, e;
 	uint32_t lastpos = 0;
 	uint8_t done = 0;
@@ -275,12 +410,14 @@ int32_t main(int32_t argc, int8_t* argv[])
 	SDL_ShowCursor(SDL_DISABLE);
 	
 	TTF_Init();
-	gFont = TTF_OpenFont( "font.ttf", 10 );
+	gFont = TTF_OpenFont( "font.ttf", 12 );
 	TTF_SetFontStyle(gFont, TTF_STYLE_NORMAL);
 	
 	img = Load_Image("background.bmp");
 	font_bmp = Load_Image("font.png");
 	font_bmp_small = Load_Image("font_small.png");
+	
+	Init_Sound();
 	
 	SDL_WM_SetCaption(TITLE_WINDOW, NULL);
 	
@@ -291,76 +428,8 @@ int32_t main(int32_t argc, int8_t* argv[])
 	USB_Mount();
 	
 	currentdir = getcwd(cwdbuf, 512);
-
-	list_all_files(currentdir,emus);
 	
-	while (done == 0) 
-	{
-		while (done == 0) 
-		{
-			controls();
-			
-			TV_Out();
-			SD_Mount();
-			
-			SDL_BlitSurface(img, NULL, backbuffer, NULL);
-			Draw_Rect(backbuffer, 0, select_menu*38, 320, 39, 500);
-			Display_Files(&list_menu, emus);
-			
-			if (button_state[0] == 1) 
-			{
-				if (select_menu == 0 && list_menu > 0)
-				{
-					list_menu = list_menu - 5;
-					select_menu = 5;
-				}
-				else if (select_menu > 0) 
-				{
-					select_menu--;
-				}
-			}
-			else if (button_state[1]  == 1)
-			{
-				if (select_menu > 4)
-				{
-					list_menu = list_menu + 5;
-					select_menu = 0;
-				}
-				else if (select_menu < 5)
-				{
-					if (!((select_menu+list_menu)+2 > emus_totalsize))
-					select_menu++;
-				}
-			}
-			
-			if (button_state[4] == 1) 
-			{
-				done = 1;
-				err = 1;
-			}
-			
-			/* Shutdown */
-			if (button_state[12] == 1) 
-			{
-				err = Shutdown();
-				if (err == 2 || err == 3) done = 1;
-			}
-			
-			SDL_SoftStretch(backbuffer, NULL, screen, NULL);
-			SDL_Flip(screen);
-			
-			SDL_Delay(20);
-		}
-		
-		if (emus[select_menu+list_menu].yes_search[0] == 'y' && (err == 1 || err == 4))
-		{
-			/* Refresh again */
-			list_all_files(currentdir,emus);
-			err = File_Browser_file(emus);
-		}
-		
-		if (err == 0) done = 0;
-	}
+	MenuBrowser(&done);
 
 	if (backbuffer != NULL) SDL_FreeSurface(backbuffer);
 	if (screen != NULL) SDL_FreeSurface(screen);
@@ -374,9 +443,9 @@ int32_t main(int32_t argc, int8_t* argv[])
 		case 2:
 		case 3:
 			if (err == 2)
-			snprintf(temp_string, MAX_LENGH, "exec /sbin/reboot");
+			snprintf(temp_string, sizeof(temp_string), "exec /sbin/reboot");
 			else
-			snprintf(temp_string, MAX_LENGH, "exec /sbin/poweroff");
+			snprintf(temp_string, sizeof(temp_string), "exec /sbin/poweroff");
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
 		/* Launch the executable 
@@ -385,14 +454,14 @@ int32_t main(int32_t argc, int8_t* argv[])
 		 * They should be avoided whetever possible. This one is most suited for games.
 		 * */
 		case 1:
-			snprintf(temp_string, MAX_LENGH, "%s %s", emus[select_menu+list_menu].executable_path, emus[select_menu+list_menu].commandline);
+			snprintf(temp_string, sizeof(temp_string), "%s %s", emus[select_menu+list_menu].executable_path, emus[select_menu+list_menu].commandline);
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
 		/* Same, except that we also need to parse the additional file.
 		 * Emulators are the most likely to make use of this, followed by game engines and apps like ffplay.
 		 * */
 		case 4:
-			snprintf(temp_string, MAX_LENGH, "%s %s %s", emus[select_menu+list_menu].executable_path, emus[select_menu+list_menu].commandline , additional_file);
+			snprintf(temp_string, sizeof(temp_string), "exec %s %s %s", emus[select_menu+list_menu].executable_path, emus[select_menu+list_menu].commandline, additional_file);
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
 	}

@@ -69,3 +69,11 @@ void Draw_Rect(SDL_Surface* screen, int16_t x, int16_t y, uint16_t width, uint16
 	
 	SDL_UnlockSurface(screen);
 }
+
+/* Framerate limiter, This is the only SDL_Delay that we'll need */
+void Limit_FPS()
+{
+	uint32_t start;
+	start = SDL_GetTicks();
+	if((1000.0f/60.0f) > SDL_GetTicks()-start) SDL_Delay((1000.0f/60.0f)-(SDL_GetTicks()-start));	
+}

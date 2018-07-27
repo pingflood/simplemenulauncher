@@ -10,7 +10,7 @@ DEFINES =
 INCLUDES = -I.
 OPT_FLAGS  = -Os -s
 
-CFLAGS = $(DEFINES) $(INCLUDES) $(OPT_FLAGS) -std=gnu11 
+CFLAGS = $(DEFINES) $(INCLUDES) $(OPT_FLAGS) -std=gnu11 -DRS97
 LDFLAGS = -lSDL -lSDL_image -lSDL_ttf
 
 # Redream (main engine)

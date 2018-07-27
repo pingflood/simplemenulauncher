@@ -13,7 +13,7 @@
 #define DEFAULT_TEXT "Select a file to launch"
 #define DEFAULT_TEXT_SEARCH "What file do you want to run with it ?"
 
-#define INST_TEXT "[A] Start/Go to directory, [SELECT] Exit"
+#define INST_TEXT "[A] Start/Go to directory, [B/SELECT] Exit"
 #define INST_TEXT_SEARCH "[A] Choose file, [B] Cancel"
 
 #define FILE_DELETED "File deleted !"

@@ -7,6 +7,22 @@
 #include <sys/stat.h>
 #include <SDL/SDL.h>
 
+
+#ifdef RS97
+//for soundcard
+#include <sys/ioctl.h>
+#include <linux/soundcard.h>
+#include <signal.h>
+#include <sys/statvfs.h>
+#include <errno.h>
+#include <fcntl.h> //for battery
+//for browsing the filesystem
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#endif
+
+
 #include "rs97.h"
 
 extern SDL_Surface *screen, *backbuffer;
@@ -38,6 +54,16 @@ uint8_t getVolumeMode(uint8_t vol) {
 	if (!vol) return VOLUME_MODE_MUTE;
 	else if (memdev > 0 && !(memregs[0x10300 >> 2] >> 6 & 0b1)) return VOLUME_MODE_PHONES;
 	return VOLUME_MODE_NORMAL;
+}
+
+void Init_Sound()
+{
+#ifdef RS97
+	unsigned long soundDev = open("/dev/mixer", O_RDWR);
+	int vol = (100 << 8) | 100;
+	ioctl(soundDev, SOUND_MIXER_WRITE_VOLUME, &vol);
+	close(soundDev);
+#endif
 }
 
 void mountSd() {

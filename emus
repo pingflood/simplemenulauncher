@@ -9,7 +9,7 @@ fceux.png
 €
 OSWAN
 WONDERSWAN EMULATOR
-./oswan
+/mnt/int_sd/emus/oswan/oswan.dge
 y
 .ws,.wsc,.zip
 K
@@ -27,8 +27,8 @@ fceux.png
 €
 OSWAN
 WONDERSWAN EMULATOR
-./oswan
-y
+/mnt/int_sd/emus/oswan/oswan.dge
+n
 .ws,.wsc,.zip
 K
 oswan.png

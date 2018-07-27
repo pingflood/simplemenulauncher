@@ -40,7 +40,8 @@ extern uint8_t *buf, *cwdbuf;
 extern int32_t select_menu, list_menu;
 extern uint8_t additional_file[MAX_NAME_SIZE];
 
-static int8_t file_name[512][512];
+/* 4096 just in case they use big rom sets... We may never know !*/
+static int8_t file_name[4096][512];
 static int16_t file_type[OUR_PATH_MAX];
 static uint16_t fileid_selected = 0;
 static uint16_t choice = 0;
@@ -74,19 +75,19 @@ void list_all_files(int8_t* directory, struct file_struct* example)
 {
 	DIR *dir;
 	struct dirent *ent;
-	uint8_t temp;
+	uint8_t isit_a_directory;
 	uint32_t i, e;
-	int16_t pc, pc2;
-	uint8_t present, present2;
+	int16_t pc;
+	uint8_t present[2];
+	int8_t* pch[3];
 	
 	/* Reset all the stored files to zero */
-	for(i=0;i<512;i++)
+	for(i=0;i<4096;i++)
 	{
 		strncpy(file_name[i], "", 512);
 	}
 	
 	i = 0;
-	temp = 0;
 	pc = -1;
 	numb_files = 0;
 	
@@ -105,39 +106,39 @@ void list_all_files(int8_t* directory, struct file_struct* example)
 				numb_files++;
 			}
 			
-			int8_t* pch = strstr (ent->d_name, FORMAT_FILE);
+			pch[0] = strstr (ent->d_name, FORMAT_FILE);
 			/* Reject these two signs and the executable itself */
-			int8_t* pch2 = strstr (ent->d_name,"..");
-			int8_t* pch3 = strstr (ent->d_name,EXECUTABLE_NAME);
+			pch[1] = strstr (ent->d_name,"..");
+			pch[2] = strstr (ent->d_name,EXECUTABLE_NAME);
 			pc = strncmp (ent->d_name, ".", 2);
 			
 			/* Check if file in question is a folder */
-			temp = is_folder(ent->d_name);	
-			present = (pch2 == NULL && pch3 == NULL && pc != 0 ) ? 1 : 0;
+			isit_a_directory = is_folder(ent->d_name);	
+			present[0] = (pch[1] == NULL && pch[2] == NULL && pc != 0 ) ? 1 : 0;
 			
-			if (present)
+			if (present[0] == 1)
 			{
-				present2 = 0;
+				present[1] = 0;
 				/* Let's look for the extension in our file */
 				for(e=0;e<example[list_menu+select_menu].howmuchext;e++)
 				{
 					if (strstr (ent->d_name, example[list_menu+select_menu].ext[e]) != NULL) 
 					{
-						present2 = 1;
+						present[1] = 1;
 						break;
 					}
 				}
 				
-				if (temp == 1 || present2 == 1)
+				if (isit_a_directory == 1 || present[1] == 1)
 				{
 						/* Copy string cotent from ent->d_name to file_name[i] */
 						strncpy(file_name[i], ent->d_name, 512);
 						
-						if (present2 == 1)
+						if (present[1] == 1)
 						{
 							file_type[i] = BLUE_C;
 						}
-						else if (temp)
+						else if (isit_a_directory == 1)
 						{
 							file_type[i] = F_C;
 						}
@@ -275,10 +276,35 @@ void draw_files_list()
 	}
 }
 
+
 static void Controls_filebrowser()
 {	
+	static uint8_t state_b[2];
+	static uint8_t time_b[2];
+	uint8_t i;
+	
+	for(i=0;i<2;i++)
+	{
+		if (button_state[i] == 2)
+		{
+			time_b[i]++;
+			if (time_b[i] > 3)
+				state_b[i] = 1;
+			if (time_b[i] > 4)
+			{
+				state_b[i] = 0;
+				time_b[i] = 0;
+			}
+		}
+		else
+		{
+			state_b[i] = 0;
+			time_b[i] = 0;
+		}
+	}
+	
 	/* If Up button is pressed down... (or Left button held) */
-	if (button_state[0] == 2 || button_state[2] > 0)
+	if (button_state[0] == 1 || state_b[0] == 1)
 	{
 		if (choice > 0) 
 		{
@@ -293,10 +319,9 @@ static void Controls_filebrowser()
 			refresh_cursor(3);
 			set_fileid();
 		}
-		SDL_Delay(4);
 	}
 	/* If Down button is pressed down... (or Right button held) */
-	else if (button_state[1] == 2 || button_state[3] > 0)
+	else if (button_state[1] == 1 || state_b[1] == 1)
 	{
 		/* Don't let the user to scroll more than there are files... */
 		if (fileid_selected < numb_files)
@@ -316,7 +341,6 @@ static void Controls_filebrowser()
 				refresh_cursor(3);
 			}
 		}
-		SDL_Delay(4);
 	}
 }
 
@@ -362,9 +386,7 @@ int32_t File_Browser_file(struct file_struct* example)
 				return 4;
 			}
 		}
-		
-		/* Don't waste CPU cycles */
-		SDL_Delay(64);
+		Limit_FPS();
 	}
 	
 	return 0;

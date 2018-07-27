@@ -23,13 +23,13 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include "main.h"
 #include "graphics.h"
 #include "rs97.h"
 #include "browser.h"
+#include "dirname.h"
 
 SDL_Surface *screen, *backbuffer;
 SDL_Surface *img, *font_bmp, *font_bmp_small;
@@ -57,7 +57,7 @@ uint16_t emus_totalsize, games_totalsize, apps_totalsize;
 uint8_t* loop(uint8_t* name, uint32_t* lastpos)
 {
 	uint32_t i, a;
-	uint8_t tmp[32];
+	uint8_t tmp[OUR_PATH_MAX];
 	for(a=*lastpos;a<*lastpos+MAX_NAME_SIZE;a++)
 	{
 		snprintf(tmp, MAX_NAME_SIZE, "%s", name);
@@ -81,7 +81,7 @@ void Fill_Element(int sz, struct file_struct* example, uint16_t* totalsize)
 	uint32_t i, a, e;
 	/* This is used to walk though the file, one entry at a time */
 	uint32_t lastpos = 0;
-	uint8_t tmp[32];
+	uint8_t tmp[OUR_PATH_MAX];
 	uint32_t totalsz;
 	
 	for(e=0;e<MAX_ELEMENTS;e++)
@@ -201,7 +201,7 @@ void Display_Files(int32_t* listi, struct file_struct* structure_file)
 	 * so let's not overdraw */
 	for(i=0;i<6;i++)
 	{
-		if (structure_file[*listi+i].icon) Put_image(structure_file[*listi+i].icon, 8, 4+(39*i));
+		if (structure_file[*listi+i].icon) Put_image(structure_file[*listi+i].icon, 8, 4+(38*i));
 		Print_text(font_bmp, 50,1+(39*i), structure_file[*listi+i].name, COLOR_INACTIVE_ITEM, 16);
 		Print_text(font_bmp_small, 50,25+(39*i), structure_file[*listi+i].description, COLOR_INACTIVE_ITEM, 8);
 	}
@@ -265,22 +265,26 @@ struct file_struct* SetMenu(uint8_t cc, uint16_t* tot)
 	}
 }
 
-void MenuBrowser(uint8_t *done)
+
+void MenuBrowser()
 {
 	static uint8_t state_b[2];
 	static uint8_t time_b[2];
+	uint8_t temp_string[512];
+	char yourpath[128];
 	static uint8_t select_cat = 0;
 	static uint16_t struct_totalsize = 0;
 	uint8_t i;
+	uint8_t done = 0;
 	
 	struct file_struct* structure_file;
 	structure_file = SetMenu(0, &struct_totalsize);
 	
 	list_all_files(currentdir,structure_file);
 	
-	while (*done == 0) 
+	while (done == 0) 
 	{
-		while (*done == 0) 
+		while (done == 0) 
 		{
 			controls();
 					
@@ -293,9 +297,9 @@ void MenuBrowser(uint8_t *done)
 				if (button_state[i] == 2)
 				{
 					time_b[i]++;
-					if (time_b[i] > 3)
+					if (time_b[i] > 1)
 						state_b[i] = 1;
-					if (time_b[i] > 4)
+					if (time_b[i] > 2)
 					{
 						state_b[i] = 0;
 						time_b[i] = 0;
@@ -316,12 +320,16 @@ void MenuBrowser(uint8_t *done)
 			if (button_state[9] == 1)
 			{
 				if (select_cat > 0) select_cat--;
+				list_menu = 0;
+				select_menu = 0;
 				structure_file = SetMenu(select_cat, &struct_totalsize);
 			}
 			/* R shoulder */
 			else if (button_state[10] == 1)
 			{
 				if (select_cat < 2) select_cat++;
+				list_menu = 0;
+				select_menu = 0;
 				structure_file = SetMenu(select_cat, &struct_totalsize);
 			}
 					
@@ -329,7 +337,7 @@ void MenuBrowser(uint8_t *done)
 			{
 				if (select_menu == 0 && list_menu > 0)
 				{
-					list_menu = list_menu - 5;
+					list_menu = list_menu - 6;
 					select_menu = 5;
 				}
 				else if (select_menu > 0) 
@@ -341,7 +349,7 @@ void MenuBrowser(uint8_t *done)
 			{
 				if (select_menu > 4)
 				{
-					list_menu = list_menu + 5;
+					list_menu = list_menu + 6;
 					select_menu = 0;
 				}
 				else if (select_menu < 5)
@@ -353,7 +361,7 @@ void MenuBrowser(uint8_t *done)
 					
 			if (button_state[4] == 1) 
 			{
-				*done = 1;
+				done = 1;
 				err = 1;
 			}
 					
@@ -361,7 +369,7 @@ void MenuBrowser(uint8_t *done)
 			if (button_state[12] == 1) 
 			{
 				err = Shutdown();
-				if (err == 2 || err == 3) *done = 1;
+				if (err == 2 || err == 3) done = 1;
 			}
 					
 			SDL_SoftStretch(backbuffer, NULL, screen, NULL);
@@ -376,18 +384,57 @@ void MenuBrowser(uint8_t *done)
 			err = File_Browser_file(structure_file);
 		}
 			
-		if (err == 0) *done = 0;
+		if (err == 0) done = 0;
 	}
+
+	if (backbuffer != NULL) SDL_FreeSurface(backbuffer);
+	if (screen != NULL) SDL_FreeSurface(screen);
+	if (img != NULL) SDL_FreeSurface(img);
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
+	SDL_Quit();
+
+	if (err == 1 || err == 4)
+		chdir(DirName(structure_file[select_menu+list_menu].executable_path));
+
+	switch(err)
+	{
+		/* Shutdowns or reboot */
+		case 2:
+		case 3:
+			if (err == 2)
+			snprintf(temp_string, sizeof(temp_string), "exec /sbin/reboot");
+			else
+			snprintf(temp_string, sizeof(temp_string), "exec /sbin/poweroff");
+			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
+		break;
+		/* Launch the executable 
+		 * It's important that we also need to parse the command line switch.
+		 * Sure, we could have used an sh file for that but they like being corrupted too...
+		 * They should be avoided whetever possible. This one is most suited for games.
+		 * */
+		case 1:
+			//snprintf(yourpath, sizeof(yourpath), "%s", DirName(structure_file[select_menu+list_menu].executable_path));
+			
+			snprintf(temp_string, sizeof(temp_string), "%s %s", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline);
+			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
+		break;
+		/* Same, except that we also need to parse the additional file.
+		 * Emulators are the most likely to make use of this, followed by game engines and apps like ffplay.
+		 * */
+		case 4:
+			snprintf(temp_string, sizeof(temp_string), "%s %s \"%s\"", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline, additional_file);
+			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
+		break;
+	}
+	
 }
 
 
 int32_t main(int32_t argc, int8_t* argv[]) 
 {
 	uint8_t tmp[32];
-	uint8_t temp_string[128];
 	uint32_t i, a, e;
 	uint32_t lastpos = 0;
-	uint8_t done = 0;
 
 	/* Now, these environment variables are supposed to be set through sh.
 	 * But what happens if those lines get removed or are incorrectly modified ? Well you're screwed, simple.
@@ -410,7 +457,7 @@ int32_t main(int32_t argc, int8_t* argv[])
 	SDL_ShowCursor(SDL_DISABLE);
 	
 	TTF_Init();
-	gFont = TTF_OpenFont( "font.ttf", 12 );
+	gFont = TTF_OpenFont("font.ttf", 12 );
 	TTF_SetFontStyle(gFont, TTF_STYLE_NORMAL);
 	
 	img = Load_Image("background.bmp");
@@ -418,8 +465,6 @@ int32_t main(int32_t argc, int8_t* argv[])
 	font_bmp_small = Load_Image("font_small.png");
 	
 	Init_Sound();
-	
-	SDL_WM_SetCaption(TITLE_WINDOW, NULL);
 	
 	apps_totalsize = Load_Files(0);
 	emus_totalsize = Load_Files(1);
@@ -429,45 +474,12 @@ int32_t main(int32_t argc, int8_t* argv[])
 	
 	currentdir = getcwd(cwdbuf, 512);
 	
-	MenuBrowser(&done);
+	MenuBrowser();
 
-	if (backbuffer != NULL) SDL_FreeSurface(backbuffer);
-	if (screen != NULL) SDL_FreeSurface(screen);
-	if (img != NULL) SDL_FreeSurface(img);
-	SDL_QuitSubSystem(SDL_INIT_VIDEO);
-	SDL_Quit();
-
-	switch(err)
-	{
-		/* Shutdowns or reboot */
-		case 2:
-		case 3:
-			if (err == 2)
-			snprintf(temp_string, sizeof(temp_string), "exec /sbin/reboot");
-			else
-			snprintf(temp_string, sizeof(temp_string), "exec /sbin/poweroff");
-			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
-		break;
-		/* Launch the executable 
-		 * It's important that we also need to parse the command line switch.
-		 * Sure, we could have used an sh file for that but they like being corrupted too...
-		 * They should be avoided whetever possible. This one is most suited for games.
-		 * */
-		case 1:
-			snprintf(temp_string, sizeof(temp_string), "%s %s", emus[select_menu+list_menu].executable_path, emus[select_menu+list_menu].commandline);
-			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
-		break;
-		/* Same, except that we also need to parse the additional file.
-		 * Emulators are the most likely to make use of this, followed by game engines and apps like ffplay.
-		 * */
-		case 4:
-			snprintf(temp_string, sizeof(temp_string), "exec %s %s %s", emus[select_menu+list_menu].executable_path, emus[select_menu+list_menu].commandline, additional_file);
-			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
-		break;
-	}
 
 	return 0;
 }
+
 
 void controls()
 {

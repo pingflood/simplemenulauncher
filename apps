@@ -1,72 +1,9 @@
-LOVE
-NES EMULATOR
-./fceux
+FFPLAY
+VIDEO PLAYER
+/mnt/int_sd/apps/ffplay/ffplay
 y
-.nes,.rom,.zip
+.mp4,.roq,.avi,.mp3,.ogg,.flac,.mpg,.mkv,.webm,.wav,.cpk
 K
-fceux.png
+icons/ffplay.png
 600
-€
-OSWAN
-WONDERSWAN EMULATOR
-./oswan
-y
-.ws,.wsc,.zip
-K
-oswan.png
-600
-€
-FCEUX
-NES EMULATOR
-./fceux
-y
-.nes,.rom,.zip
-K
-fceux.png
-600
-€
-OSWAN
-WONDERSWAN EMULATOR
-./oswan
-y
-.ws,.wsc,.zip
-K
-oswan.png
-600
-€
-FCEUX
-NES EMULATOR
-./fceux
-y
-.nes,.rom,.zip
-K
-fceux.png
-600
-€
-OSWAN
-WONDERSWAN EMULATOR
-./oswan
-y
-.ws,.wsc,.zip
-K
-oswan.png
-600
-€
-FCEUX
-NES EMULATOR
-./fceux
-y
-.nes,.rom,.zip
-K
-fceux.png
-600
-€
-OSWAN
-WONDERSWAN EMULATOR
-./oswan
-y
-.ws,.wsc,.zip
-K
-oswan.png
-600
-€
+===

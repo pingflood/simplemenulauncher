@@ -1,72 +1,63 @@
 FCEUX
 NES EMULATOR
-./fceux
+/mnt/int_sd/emus/fceux/fceux
 y
-.nes,.rom,.zip
+.nes,.fds,.fdf,.bin,.zip,.rom
 K
-fceux.png
+icons/fceux.png
 600
-€
+===
 OSWAN
 WONDERSWAN EMULATOR
 /mnt/int_sd/emus/oswan/oswan.dge
 y
 .ws,.wsc,.zip
 K
-oswan.png
+icons/oswan.png
 600
-€
-FCEUX
-NES EMULATOR
-./fceux
+===
+DUMBSNES
+TRY POCKETSNES BEFORE THAT ONE
+/mnt/int_sd/emus/dumbsnes/run.dge
 y
-.nes,.rom,.zip
+.smc,.sfc,.bin,.zip
 K
-fceux.png
+icons/dumbsnes.png
 600
-€
-OSWAN
-WONDERSWAN EMULATOR
-/mnt/int_sd/emus/oswan/oswan.dge
+===
+POCKETSNES
+SUPER NES EMULATOR
+/mnt/int_sd/emus/pocketsnes/PocketSNES
+y
+.smc,.sfc,.bin,.zip
+K
+icons/pocketsnes.png
+600
+===
+SMS_SDL
+MASTER_SYSTEM EMULATOR
+/mnt/int_sd/emus/sms_sdl/sms_sdl
+y
+.sms,.bin,.gg,.bin,.zip,.rom
+K
+icons/sms.png
+600
+===
+SCUMMVM
+INTERPRETER
+/mnt/int_sd/emus/scummvm/run.dge
 n
-.ws,.wsc,.zip
+.dbs,.dbs
 K
-oswan.png
+icons/scummvm.png
 600
-€
-FCEUX
-NES EMULATOR
-./fceux
-y
-.nes,.rom,.zip
+===
+FBA-GCW0
+ARCADE EMULATOR
+/mnt/int_sd/emus/fba-gcw0/fbasdl.dge
+n
+.dbs,.dbs
 K
-fceux.png
+icons/fba.png
 600
-€
-OSWAN
-WONDERSWAN EMULATOR
-./oswan
-y
-.ws,.wsc,.zip
-K
-oswan.png
-600
-€
-FCEUX
-NES EMULATOR
-./fceux
-y
-.nes,.rom,.zip
-K
-fceux.png
-600
-€
-OSWAN
-WONDERSWAN EMULATOR
-./oswan
-y
-.ws,.wsc,.zip
-K
-oswan.png
-600
-€
+===

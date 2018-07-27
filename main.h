@@ -1,6 +1,8 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
+#include <SDL/SDL.h>
+
 #define MAX_LENGH 512
 #define OUR_PATH_MAX 512
 #define MAX_NAME_SIZE 64

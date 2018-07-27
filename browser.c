@@ -41,7 +41,7 @@ extern int32_t select_menu, list_menu;
 extern uint8_t additional_file[MAX_NAME_SIZE];
 
 /* 4096 just in case they use big rom sets... We may never know !*/
-static int8_t file_name[4096][512];
+static int8_t file_name[1024][512];
 static int16_t file_type[OUR_PATH_MAX];
 static uint16_t fileid_selected = 0;
 static uint16_t choice = 0;
@@ -82,7 +82,7 @@ void list_all_files(int8_t* directory, struct file_struct* example)
 	int8_t* pch[3];
 	
 	/* Reset all the stored files to zero */
-	for(i=0;i<4096;i++)
+	for(i=0;i<1024;i++)
 	{
 		strncpy(file_name[i], "", 512);
 	}
@@ -229,7 +229,7 @@ void refresh_cursor(uint8_t filemode)
 	if (filemode > 0 && filemode < 4) 
 	{
 		Draw_TTF_Text(currentdir, 8, 16);
-		switch(filemode_search)
+		/*switch(filemode_search)
 		{
 			case 0:
 				Draw_TTF_Text(DEFAULT_TEXT, 96, 6);
@@ -239,7 +239,7 @@ void refresh_cursor(uint8_t filemode)
 				Draw_TTF_Text(DEFAULT_TEXT_SEARCH, 96, 6);
 				Draw_TTF_Text(INST_TEXT_SEARCH, 60, 28);
 			break;
-		}
+		}*/
 	}
 	update_entirescreen();
 }
@@ -373,7 +373,7 @@ int32_t File_Browser_file(struct file_struct* example)
 		if (button_state[4]==1 || button_state[5]==1)
 		{
 			/* If is is a folder, then go to that folder */
-			if (file_type[fileid_selected] == F_C || choice == 0) 
+			if (file_type[fileid_selected] == F_C || (choice == 0 && scroll_choice == 0)) 
 			{
 				goto_folder(example);	
 			}

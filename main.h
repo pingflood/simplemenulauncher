@@ -87,6 +87,8 @@ void goto_folder();
 void remove_file();
 uint8_t clear_dir(int8_t* which_dir);
 
+void Backlight_control();
+
 void set_fileid();
 
 #endif

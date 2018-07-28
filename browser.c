@@ -25,6 +25,7 @@
 #include <SDL/SDL_ttf.h>
 #include "main.h"
 #include "graphics.h"
+#include "rs97.h"
 
 extern SDL_Surface *screen, *backbuffer;
 extern TTF_Font *gFont;
@@ -33,7 +34,6 @@ static SDL_Event gui_event;
 extern struct file_struct apps[MAX_ELEMENTS], games[MAX_ELEMENTS], emus[MAX_ELEMENTS];
 extern uint16_t emus_totalsize, games_totalsize, apps_totalsize;
 
-extern uint8_t button_state[16], button_time[16];
 extern int8_t* currentdir;
 extern uint8_t *buf, *cwdbuf;
 
@@ -48,6 +48,21 @@ static uint16_t choice = 0;
 static uint16_t scroll_choice = 0;
 static uint8_t filemode_search = 0;
 static int16_t numb_files = 0;
+
+/*
+ * Why not use my own text drawing routines like i do in the Menu browser
+ * but not in the file browser ? Well, SDL_ttf supports Unicode and the font provided
+ * also has a bunch of characters for Unicode. (UTF-8, UTF-16 sucks and provides little to no advantage)
+ * Users want to display japanese, chinese, korean, russian  characters and more..
+ * I honestly want to say fuck non-latin languages but i don't want people to bitch about it
+ * so SDL_ttf & freetype2 to the rescue for making my life easier and help me sleep.
+ * On a sidenote, yes, japan has an awesome culture with cute anime characters, mecha things
+ * and all but do not be fooled : Japanese, as a language, is horrible.
+ * Trying to figure out Japanese is like trying to make sense of Systemd three times :
+ * Only for the most patient kind and definitely of the degenerate kind.
+ * You know there's something wrong with it when the very own jap people have to spend a fourth of their
+ * pathetic lives trying to grapse it.
+ * */
 
 static void Draw_TTF_Text(int8_t* text, int16_t x, int16_t y)
 {
@@ -229,17 +244,6 @@ void refresh_cursor(uint8_t filemode)
 	if (filemode > 0 && filemode < 4) 
 	{
 		Draw_TTF_Text(currentdir, 8, 16);
-		/*switch(filemode_search)
-		{
-			case 0:
-				Draw_TTF_Text(DEFAULT_TEXT, 96, 6);
-				Draw_TTF_Text(INST_TEXT, 60, 28);
-			break;
-			case 1:
-				Draw_TTF_Text(DEFAULT_TEXT_SEARCH, 96, 6);
-				Draw_TTF_Text(INST_TEXT_SEARCH, 60, 28);
-			break;
-		}*/
 	}
 	update_entirescreen();
 }
@@ -359,6 +363,10 @@ int32_t File_Browser_file(struct file_struct* example)
 	
 	while (button_state[6] < 1)
 	{
+		/* We need to make sure for safety that it can be done in the file browser too */
+		TV_Out();
+		SD_Mount();
+		
 		/* Call function for input */
 		controls();
 		Controls_filebrowser();
@@ -368,6 +376,8 @@ int32_t File_Browser_file(struct file_struct* example)
 			file_chosen = 0;
 			return 0;
 		}
+		
+		Backlight_control();
 			
 		/* If Control/Return button is pressed... */
 		if (button_state[4]==1 || button_state[5]==1)

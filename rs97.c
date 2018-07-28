@@ -19,17 +19,18 @@
 //for browsing the filesystem
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/mman.h>
 #include <dirent.h>
 #endif
 
-
 #include "rs97.h"
 
-extern SDL_Surface *screen, *backbuffer;
+extern SDL_Surface *screen, *backbuffer, *img;
 
 /* RS-97 specific things */
 uint8_t tvout_enabled = 0, sdcard_mount = 0;
 int32_t memdev = 0;
+uint32_t backlight_v = 75;
 volatile uint32_t *memregs;
 
 int16_t curMMCStatus, preMMCStatus;
@@ -49,28 +50,67 @@ uint8_t getTVOutStatus() {
 	return 0;
 }
 
-int16_t volumeModePrev, volumeMode;
-uint8_t getVolumeMode(uint8_t vol) {
-	if (!vol) return VOLUME_MODE_MUTE;
-	else if (memdev > 0 && !(memregs[0x10300 >> 2] >> 6 & 0b1)) return VOLUME_MODE_PHONES;
-	return VOLUME_MODE_NORMAL;
-}
-
-void Init_Sound()
+void SetCPU(uint32_t mhz)
 {
 #ifdef RS97
-	unsigned long soundDev = open("/dev/mixer", O_RDWR);
-	int vol = (100 << 8) | 100;
-	ioctl(soundDev, SOUND_MIXER_WRITE_VOLUME, &vol);
-	close(soundDev);
+	if (memdev > 0) 
+	{
+		uint32_t m = mhz / 6;
+		memregs[0x10 >> 2] = (m << 24) | 0x090520;
+	}
 #endif
 }
 
-void mountSd() {
+void HW_Init()
+{
+#ifdef RS97
+	uint32_t soundDev = open("/dev/mixer", O_RDWR);
+	int32_t vol = (100 << 8) | 100;
+	
+	/* Init memory registers */
+	memdev = open("/dev/mem", O_RDWR);
+	if (memdev > 0) 
+	{
+		memregs = (uint32_t*)mmap(0, 0x20000, PROT_READ | PROT_WRITE, MAP_SHARED, memdev, 0x10000000);
+		if (memregs == MAP_FAILED) 
+		{
+			printf("Could not mmap hardware registers!\n");
+			close(memdev);
+		}
+	}
+	ioctl(soundDev, SOUND_MIXER_WRITE_VOLUME, &vol);
+	close(soundDev);
+	
+	/* Set CPU clock to its default */
+	SetCPU(528);
+	
+#endif
+}
+
+void HW_Deinit()
+{
+}
+
+
+void Increase_Backlight()
+{
+	char buf[34] = {0};
+	backlight_v = backlight_v + 25;
+	/* 0 means that the screen is shut off, lowest backlight is 1 */
+	if (backlight_v > 100) backlight_v = 1;
+	
+	sprintf(buf, "echo %d > /proc/jz/lcd_backlight", backlight_v);
+	
+	system(buf);
+}
+
+void mountSd()
+{
 	system("sleep 1; mount -t vfat -o rw,utf8 /dev/mmcblk$(( $(readlink /dev/root | head -c -3 | tail -c1) ^ 1 ))p1 /mnt/ext_sd");
 }
 
-void umountSd() {
+void umountSd()
+{
 	system("umount -fl /mnt/ext_sd");
 }
 
@@ -91,7 +131,7 @@ void SD_Mount()
 		}
 	}
 	
-	if (getMMCStatus() == MMC_INSERT)
+	if (getMMCStatus() == MMC_INSERT && sdcard_mount == 0)
 	{
 		mountSd();
 		sdcard_mount = 1;
@@ -143,6 +183,7 @@ void USB_Mount()
 			mountSd();
 		}
 	}
+	system("sync; sync; sync");
 }
 
 void TV_Out()
@@ -168,23 +209,37 @@ void TV_Out()
 		}
 	}
 	
-	done = prompt("ENABLE TVOUT?", "A BUTTON: YES", "B BUTTON: NO");
-	if (done == 1)
+	if (tvout_enabled == 0)
 	{
-		done = prompt("SELECT MODE", "A BUTTON: NTSC", "B BUTTON: PAL");
-		system("echo 0 > /proc/jz/tvselect"); // always reset tv out
-		switch(done)
+		done = prompt("ENABLE TVOUT?", "A BUTTON: YES", "B BUTTON: NO");
+		if (done == 1)
 		{
-			case 1:
-				system("echo 2 > /proc/jz/tvselect");
-			break;
-			case 2:
-				system("echo 1 > /proc/jz/tvselect");
-			break;
+			done = prompt("SELECT MODE", "A BUTTON: PAL", "B BUTTON: NTSC");
+			system("echo 0 > /proc/jz/tvselect"); // always reset tv out
+			switch(done)
+			{
+				case 1:
+					system("echo 2 > /proc/jz/tvselect");
+					tvout_enabled = 1;
+				break;
+				case 2:
+					system("echo 1 > /proc/jz/tvselect");
+					tvout_enabled = 1;
+				break;
+			}
 		}
 	}
 }
 
+void Unmount_all()
+{
+	umountSd();
+	system("umount -fl /dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3");
+	system("echo 0 > /proc/jz/tvselect");
+	system("/sbin/swapoff -a");
+	system("sync; sync; sync");
+	system("sleep 2");
+}
 
 uint8_t Shutdown()
 {

@@ -227,19 +227,21 @@ uint8_t prompt(uint8_t* text, uint8_t* yes_text, uint8_t* no_text)
 		SDL_SoftStretch(backbuffer, NULL, screen, NULL);
 		SDL_Flip(screen);
 	}
+	button_state[4] = 2;
+	button_state[8] = 2;
 	return done;
 }
 
 void USB_Mount_Loop()
 {
-	uint8_t done;
+	uint8_t done = 1;
 	while (done == 1) 
 	{
 		controls();
 		SDL_BlitSurface(img, NULL, backbuffer, NULL);
 		Draw_Rect(backbuffer, 56, 24, 224, 96, COLOR_SELECT);
 		Print_text(font_bmp, 80,64, "USB MOUNTED", COLOR_INACTIVE_ITEM, 16);
-		if (button_state[5] == 1 || button_state[6] == 1 || getUDCStatus() != UDC_CONNECT) done = 0;
+		if (button_state[5] == 1 || button_state[6] == 1 || button_state[8] == 1  || getUDCStatus() != UDC_CONNECT) done = 0;
 		SDL_SoftStretch(backbuffer, NULL, screen, NULL);
 		SDL_Flip(screen);
 	}
@@ -265,6 +267,11 @@ struct file_struct* SetMenu(uint8_t cc, uint16_t* tot)
 	}
 }
 
+void Backlight_control()
+{
+	if (button_state[11] == 1)
+		Increase_Backlight();
+}
 
 void MenuBrowser()
 {
@@ -297,9 +304,9 @@ void MenuBrowser()
 				if (button_state[i] == 2)
 				{
 					time_b[i]++;
-					if (time_b[i] > 1)
+					if (time_b[i] > 3)
 						state_b[i] = 1;
-					if (time_b[i] > 2)
+					if (time_b[i] > 10)
 					{
 						state_b[i] = 0;
 						time_b[i] = 0;
@@ -315,6 +322,9 @@ void MenuBrowser()
 			SDL_BlitSurface(img, NULL, backbuffer, NULL);
 			Draw_Rect(backbuffer, 0, select_menu*38, 320, 39, 500);
 			Display_Files(&list_menu, structure_file);
+			
+			if (button_state[5] == 1)
+				USB_Mount();
 			
 			/* L shoulder */
 			if (button_state[9] == 1)
@@ -358,6 +368,25 @@ void MenuBrowser()
 					select_menu++;
 				}
 			}
+			
+			if (button_state[2] == 1) 
+			{
+				if (list_menu > 0)
+				{
+					list_menu = list_menu - 6;
+					select_menu = 0;
+				}
+			}
+			else if (button_state[3] == 1) 
+			{
+				if (!((list_menu)+6 > struct_totalsize))
+				{
+					list_menu = list_menu + 6;
+					select_menu = 0;
+				}
+			}
+			
+			Backlight_control();
 					
 			if (button_state[4] == 1) 
 			{
@@ -401,10 +430,16 @@ void MenuBrowser()
 		/* Shutdowns or reboot */
 		case 2:
 		case 3:
+			/* Sync before rebooting or shuting down.
+			 * For some reasons, it will sometimes refuse to shutdown or reboot...
+			 * Since we are forcing the shutdown, we need to make sure to unmount all mount points
+			 * and sync 3 times at least for safety.
+			 * */
+			Unmount_all();
 			if (err == 2)
-			snprintf(temp_string, sizeof(temp_string), "exec /sbin/reboot");
+			snprintf(temp_string, sizeof(temp_string), "exec /sbin/reboot -f");
 			else
-			snprintf(temp_string, sizeof(temp_string), "exec /sbin/poweroff");
+			snprintf(temp_string, sizeof(temp_string), "exec /sbin/poweroff -f");
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
 		/* Launch the executable 
@@ -414,7 +449,7 @@ void MenuBrowser()
 		 * */
 		case 1:
 			//snprintf(yourpath, sizeof(yourpath), "%s", DirName(structure_file[select_menu+list_menu].executable_path));
-			
+			SetCPU(structure_file[select_menu+list_menu].real_clock_speed);
 			snprintf(temp_string, sizeof(temp_string), "%s %s", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline);
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
@@ -422,6 +457,7 @@ void MenuBrowser()
 		 * Emulators are the most likely to make use of this, followed by game engines and apps like ffplay.
 		 * */
 		case 4:
+			SetCPU(structure_file[select_menu+list_menu].real_clock_speed);
 			snprintf(temp_string, sizeof(temp_string), "%s %s \"%s\"", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline, additional_file);
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
@@ -435,6 +471,15 @@ int32_t main(int32_t argc, int8_t* argv[])
 	uint8_t tmp[32];
 	uint32_t i, a, e;
 	uint32_t lastpos = 0;
+	
+	/* Safety check for the sh script autoexec.sh.
+	 * SimpleMenuLauncher should be started without any arguments.
+	 * */
+	if (argc == 2)
+	{
+		printf("SAFE!\n");
+		return 0;
+	}
 
 	/* Now, these environment variables are supposed to be set through sh.
 	 * But what happens if those lines get removed or are incorrectly modified ? Well you're screwed, simple.
@@ -452,7 +497,7 @@ int32_t main(int32_t argc, int8_t* argv[])
 	/* The RS-97 has a crappy screen of 320x480, but with an aspect ratio of 4:3.
 	 * Thus, we need to render to a buffer and scale it before renderin to the screen.
 	 * */
-	screen = SDL_SetVideoMode(320, 480, 16, SDL_HWSURFACE ); 
+	screen = SDL_SetVideoMode(640, 480, 16, SDL_HWSURFACE ); 
 	backbuffer = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 16, 0, 0, 0, 0);
 	SDL_ShowCursor(SDL_DISABLE);
 	
@@ -464,7 +509,8 @@ int32_t main(int32_t argc, int8_t* argv[])
 	font_bmp = Load_Image("font.png");
 	font_bmp_small = Load_Image("font_small.png");
 	
-	Init_Sound();
+	HW_Init();
+	Increase_Backlight();
 	
 	apps_totalsize = Load_Files(0);
 	emus_totalsize = Load_Files(1);

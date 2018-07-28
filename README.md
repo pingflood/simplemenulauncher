@@ -14,22 +14,18 @@ Add another category for settings (Might not get added)
 
 Add support for user-set overclocking (Not trivial)
 
-Add support for the brightness button (adjustable brightness)
-
-Fix USB mounting
-
-Test SD card mounting & TV Out
-
 
 Ticked off the list
 ====================
 
-TV Out support - DONE
+TV Out support - DONE, fixed
 
-SD Card mounting - DONE
+SD Card mounting - DONE, should be fixed
 
-USB mounting - DONE
+USB mounting - DONE, Fixed
 
 Add file browser for emulators - DONE
 
 Scroll through the 2 other categories - DONE
+
+Add support for the brightness button - DONE, working

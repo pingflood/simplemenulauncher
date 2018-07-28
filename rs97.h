@@ -19,13 +19,18 @@
 extern uint8_t tvout_enabled, sdcard_mount;
 extern uint8_t button_time[20], button_state[20];
 
-extern void Init_Sound();
+extern void HW_Init();
 extern void SD_Mount();
 extern void USB_Mount();
 extern void TV_Out();
 extern void USB_Mount_Loop();
 extern int16_t getUDCStatus();
 extern uint8_t Shutdown();
+
+extern void Increase_Backlight();
+extern void SetCPU(uint32_t mhz);
+
+extern void Unmount_all();
 
 extern uint8_t prompt(uint8_t* text, uint8_t* yes_text, uint8_t* no_text);
 

@@ -16,6 +16,24 @@ K
 icons/oswan.png
 600
 ===
+REGBA
+GBA EMULATOR
+/mnt/int_sd/emus/regba/regba
+y
+.gba,.agb,.zip
+K
+icons/regba.png
+600
+===
+PCSX4ALL
+PSX EMULATOR
+/mnt/int_sd/emus/pcsx4all/pcsx4all
+y
+.cue,.pbp,.zip,.mds,.bin,.mdf,.iso,.cbn,.img
+-iso
+icons/pcsx4all.png
+600
+===
 DUMBSNES
 TRY POCKETSNES BEFORE THAT ONE
 /mnt/int_sd/emus/dumbsnes/run.dge

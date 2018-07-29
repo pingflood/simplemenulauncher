@@ -497,7 +497,7 @@ int32_t main(int32_t argc, int8_t* argv[])
 	/* The RS-97 has a crappy screen of 320x480, but with an aspect ratio of 4:3.
 	 * Thus, we need to render to a buffer and scale it before renderin to the screen.
 	 * */
-	screen = SDL_SetVideoMode(640, 480, 16, SDL_HWSURFACE ); 
+	screen = SDL_SetVideoMode(320, 480, 16, SDL_HWSURFACE ); 
 	backbuffer = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 16, 0, 0, 0, 0);
 	SDL_ShowCursor(SDL_DISABLE);
 	

@@ -161,15 +161,24 @@ void USB_Mount()
 		 * It used to be p4 on older releases and 97Next.
 		 * */
 		system("umount -fl /dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3");
+		/* Sleep for a while then file checking it after unmounting both partitions */
+		system("sleep 1; /sbin/fsck -y $(readlink -f /dev/root | head -c -2)3");
+		
 		system("echo \"/dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3\" > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun0/file");
 		
 		if (getMMCStatus() == MMC_INSERT) 
 		{
 			umountSd();
 			system("echo '/dev/mmcblk$(( $(readlink /dev/root | head -c -3 | tail -c1) ^ 1 ))p1' > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun1/file");
+			/* File system external SD card only if it exists */
+			system("/sbin/fsck -y /dev/mmcblk$(( $(readlink /dev/root | head -c -3 | tail -c1) ^ 1 ))p1");
 		}
 		
+		
 		USB_Mount_Loop();
+		
+		/* File checking the internal sd card */
+		system("/sbin/fsck -y $(readlink -f /dev/root | head -c -2)3");
 		
 		system("echo '' > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun0/file");
 		/* Note the vfat, this means that if you use ext3, you need to recompile it from source again
@@ -179,11 +188,14 @@ void USB_Mount()
 		
 		if (getMMCStatus() == MMC_INSERT) 
 		{
+			/* Now file check the sd card after unmounting */
+			system("/sbin/fsck -y /dev/mmcblk$(( $(readlink /dev/root | head -c -3 | tail -c1) ^ 1 ))p1");
 			system("echo '' > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun1/file");
 			mountSd();
 		}
+		
+		system("sync; sync; sync");
 	}
-	system("sync; sync; sync");
 }
 
 void TV_Out()

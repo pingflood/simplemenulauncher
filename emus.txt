@@ -2,7 +2,7 @@ BeebEm
 BBC MICRO Emulator
 /mnt/int_sd/emus/beebem/beebem
 y
-.dsk,.ssd,.zip,.dsd,.uef
+.dsk,.ssd,.zip,.dsd,.uef,.img
 #
 icons/beebem.png
 600

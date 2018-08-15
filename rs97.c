@@ -25,7 +25,7 @@
 
 #include "rs97.h"
 
-extern SDL_Surface *screen, *backbuffer, *img, *power_bmp;
+extern SDL_Surface *screen, *backbuffer, *img, *power_bmp, *usb_bmp[2];
 
 /* RS-97 specific things */
 uint8_t tvout_enabled = 0, sdcard_mount = 0;
@@ -152,7 +152,16 @@ void USB_Mount()
 		return;
 	}
 		
-	done = prompt("MOUNT USB ?", "A BUTTON: YES", "B BUTTON: NO");
+	if (usb_bmp[0] && usb_bmp[1])
+	{
+		done = prompt_img(usb_bmp[0]);
+		if (done == 3) done = 1;
+		else done = 0;
+	}
+	else
+	{
+		done = prompt("MOUNT USB ?", "A BUTTON: YES", "B BUTTON: NO");
+	}
 	
 	/* Only go ahead if user asked to mount SD/USB*/
 	if (done == 1)
@@ -173,7 +182,6 @@ void USB_Mount()
 			/* File system external SD card only if it exists */
 			system("/sbin/fsck -y /dev/mmcblk$(( $(readlink /dev/root | head -c -3 | tail -c1) ^ 1 ))p1");
 		}
-		
 		
 		USB_Mount_Loop();
 		
@@ -253,6 +261,35 @@ void Unmount_all()
 	system("sleep 2");
 }
 
+
+void Suspend_Mode()
+{
+	SDL_Event event;
+	uint8_t done = 1;
+	uint8_t *keystate;
+	
+	#ifdef RS97
+	char buf[34] = {0};
+	system("echo 0 > /proc/jz/lcd_backlight");
+	SetCPU(344);
+	#endif
+	
+	while(done == 1)
+	{
+		keystate = SDL_GetKeyState(NULL);
+		if (keystate[SDLK_END] || keystate[SDLK_3]) done = 0;
+		SDL_PollEvent(&event);
+		SDL_Delay(384);
+	}
+	
+	/* Set brightness and CPU speed back */ 
+	#ifdef RS97
+	SetCPU(528);
+	sprintf(buf, "echo %d > /proc/jz/lcd_backlight", backlight_v);
+	system(buf);
+	#endif
+}
+
 uint8_t Shutdown()
 {
 	uint8_t done;
@@ -272,7 +309,16 @@ uint8_t Shutdown()
 	else
 	{
 		done = prompt_img(power_bmp);
-		if (done == 1) return 0;
+		/* 1 means that they left the loop so ignore */
+		if (done == 1) 
+		{
+			return 0;
+		}
+		/* Enter suspend mode */
+		else if (done == 5) 
+		{
+			Suspend_Mode();
+		}
 		else return done;
 	}
 	

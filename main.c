@@ -32,7 +32,7 @@
 #include "dirname.h"
 
 SDL_Surface *screen, *backbuffer;
-SDL_Surface *img, *font_bmp, *font_bmp_small, *menu_icons, *power_bmp;
+SDL_Surface *img, *font_bmp, *font_bmp_small, *menu_icons, *power_bmp, *usb_bmp[2], *selector_bmp;
 TTF_Font *gFont;
 
 uint8_t button_time[15], button_state[15];
@@ -267,14 +267,30 @@ uint8_t prompt_img(SDL_Surface* img_todraw)
 void USB_Mount_Loop()
 {
 	uint8_t done = 1;
-	while (done == 1) 
+	/* Show USB graphics if loaded */
+	if (usb_bmp[0] && usb_bmp[1])
 	{
-		controls();
-		SDL_BlitSurface(img, NULL, backbuffer, NULL);
-		Draw_Rect(backbuffer, 56, 24, 224, 96, COLOR_SELECT);
-		Print_text(font_bmp, 80,64, "USB MOUNTED", COLOR_INACTIVE_ITEM, 16);
-		if (button_state[5] == 1 || button_state[6] == 1 || button_state[8] == 1  || getUDCStatus() != UDC_CONNECT) done = 0;
-		ScaleUp();
+		while (done == 1) 
+		{
+			controls();
+			SDL_BlitSurface(img, NULL, backbuffer, NULL);
+			SDL_BlitSurface(usb_bmp[1], NULL, backbuffer, NULL);
+			if (button_state[5] == 1 || button_state[6] == 1 || button_state[8] == 1  || getUDCStatus() != UDC_CONNECT) done = 0;
+			ScaleUp();
+		}
+	}
+	/* Fall back to text if not */
+	else
+	{
+		while (done == 1) 
+		{
+			controls();
+			SDL_BlitSurface(img, NULL, backbuffer, NULL);
+			Draw_Rect(backbuffer, 56, 24, 224, 96, COLOR_SELECT);
+			Print_text(font_bmp, 80,64, "USB MOUNTED", COLOR_INACTIVE_ITEM, 16);
+			if (button_state[5] == 1 || button_state[6] == 1 || button_state[8] == 1  || getUDCStatus() != UDC_CONNECT) done = 0;
+			ScaleUp();
+		}
 	}
 }
 
@@ -384,7 +400,8 @@ void MenuBrowser()
 			Draw_Rect(backbuffer, 0, select_menu*38, 320, 39, 500);
 			Display_Files(&list_menu, structure_file);
 			
-			Draw_Rect(backbuffer, 224 + (select_cat * 32), 208, 32, 32, 1024);
+			if (selector_bmp) Put_image(selector_bmp, 224 + (select_cat * 32), 201);
+			else Draw_Rect(backbuffer, 224 + (select_cat * 32), 208, 32, 32, 1024);
 			Put_image(menu_icons, 224, 208);
 			
 			if (button_state[5] == 1)
@@ -488,6 +505,13 @@ void MenuBrowser()
 	if (backbuffer != NULL) SDL_FreeSurface(backbuffer);
 	if (screen != NULL) SDL_FreeSurface(screen);
 	if (img != NULL) SDL_FreeSurface(img);
+	if (usb_bmp[0] != NULL) SDL_FreeSurface(usb_bmp[0]);
+	if (usb_bmp[1] != NULL) SDL_FreeSurface(usb_bmp[1]);
+	if (font_bmp != NULL) SDL_FreeSurface(font_bmp);
+	if (font_bmp_small != NULL) SDL_FreeSurface(font_bmp_small);
+	if (power_bmp != NULL) SDL_FreeSurface(power_bmp);
+	if (menu_icons != NULL) SDL_FreeSurface(menu_icons);
+	if (selector_bmp != NULL) SDL_FreeSurface(selector_bmp);
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	SDL_Quit();
 	
@@ -575,19 +599,28 @@ int32_t main(int32_t argc, int8_t* argv[])
 	/* The RS-97 has a crappy screen of 320x480, but with an aspect ratio of 4:3.
 	 * Thus, we need to render to a buffer and scale it before renderin to the screen.
 	 * */
-	screen = SDL_SetVideoMode(320, 480, 16, SDL_HWSURFACE ); 
+	#ifdef RS97
+	SetCPU(528);
+	screen = SDL_SetVideoMode(320, 480, 16, SDL_HWSURFACE); 
+	#else
+	screen = SDL_SetVideoMode(640, 480, 16, SDL_HWSURFACE); 
+	#endif
 	backbuffer = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 16, 0, 0, 0, 0);
 	SDL_ShowCursor(SDL_DISABLE);
 	
 	TTF_Init();
-	gFont = TTF_OpenFont("font.ttf", 12 );
+	gFont = TTF_OpenFont("gfx/font.ttf", 12 );
 	TTF_SetFontStyle(gFont, TTF_STYLE_NORMAL);
 	
-	img = Load_Image("background.bmp");
-	menu_icons = Load_Image("menu_icons.png");
-	font_bmp = Load_Image("font.png");
-	font_bmp_small = Load_Image("font_small.png");
-	power_bmp = Load_Image("power.png");
+	img = Load_Image("gfx/background.bmp");
+	menu_icons = Load_Image("gfx/menu_icons.png");
+	font_bmp = Load_Image("gfx/font.png");
+	font_bmp_small = Load_Image("gfx/font_small.png");
+	power_bmp = Load_Image("gfx/power.png");
+	
+	usb_bmp[0] = Load_Image("gfx/usb_mount.png");
+	usb_bmp[1] = Load_Image("gfx/usb_mount2.png");
+	selector_bmp = Load_Image("gfx/selector.png");
 	
 	HW_Init();
 	Increase_Backlight();

@@ -53,24 +53,31 @@ struct file_struct apps[MAX_ELEMENTS], games[MAX_ELEMENTS], emus[MAX_ELEMENTS];
 /* They are not inside the structure to avoid duplication and memory waste */
 uint16_t emus_totalsize, games_totalsize, apps_totalsize;
 
+/* Select category, global because we need it for saves */
+static uint8_t select_cat = 0;
 
-uint8_t* loop(uint8_t* name, uint32_t* lastpos)
+uint8_t* loop(uint8_t* name, uint32_t* position_file_byte)
 {
 	uint32_t i, a;
 	uint8_t tmp[OUR_PATH_MAX];
-	for(a=*lastpos;a<*lastpos+MAX_NAME_SIZE;a++)
+	
+	// Looks for big character 'K', if found then it means that there's nothing to copy
+	if (name[0] == '#')
+	{
+		name[0] = '\0';
+		return name;
+	}
+	
+	for(a=*position_file_byte;a<*position_file_byte+MAX_NAME_SIZE;a++)
 	{
 		snprintf(tmp, MAX_NAME_SIZE, "%s", name);
 		snprintf(name, MAX_NAME_SIZE, "%s%c", tmp, buf[a]);
 		if (buf[a+1] == '\n')
 		{
-			*lastpos = a + 2;
+			*position_file_byte = a + 2;
 			break;
 		}
 	}
-	
-	// Looks for big character 'K', if found then it means that there's nothing to copy
-	if (name[0] == 'K') name[0] = '\0';
 
 	return name;
 }
@@ -151,7 +158,7 @@ uint16_t Load_Files(uint8_t caca)
 	switch(caca)
 	{
 		case 0:
-			fp = fopen("./apps", "r");
+			fp = fopen("./apps.txt", "r");
 			if (fp)
 			{
 				fseek(fp, 0L, SEEK_END);
@@ -164,7 +171,7 @@ uint16_t Load_Files(uint8_t caca)
 			}
 		break;
 		case 1:
-			fp = fopen("./emus", "r");
+			fp = fopen("./emus.txt", "r");
 			if (fp)
 			{
 				fseek(fp, 0L, SEEK_END);
@@ -177,7 +184,7 @@ uint16_t Load_Files(uint8_t caca)
 			}
 		break;
 		case 2:
-			fp = fopen("./games", "r");
+			fp = fopen("./games.txt", "r");
 			if (fp)
 			{
 				fseek(fp, 0L, SEEK_END);
@@ -190,7 +197,10 @@ uint16_t Load_Files(uint8_t caca)
 			}
 		break;
 	}
-
+	
+	/* If the file could not be loaded then just report that there are no apps */
+	if (!fp) totalsize = 0;
+	
 	return totalsize;
 }
 
@@ -203,7 +213,7 @@ void Display_Files(int32_t* listi, struct file_struct* structure_file)
 	{
 		if (structure_file[*listi+i].icon) Put_image(structure_file[*listi+i].icon, 8, 4+(38*i));
 		Print_text(font_bmp, 50,1+(39*i), structure_file[*listi+i].name, COLOR_INACTIVE_ITEM, 16);
-		Print_text(font_bmp_small, 50,25+(39*i), structure_file[*listi+i].description, COLOR_INACTIVE_ITEM, 8);
+		Print_smalltext(font_bmp_small, 50,25+(39*i), structure_file[*listi+i].description, COLOR_INACTIVE_ITEM, 8);
 	}
 }
 
@@ -273,19 +283,54 @@ void Backlight_control()
 		Increase_Backlight();
 }
 
+/* 
+ * This function makes sure to save where the user was left.
+ * If it can't load said file then it will simply use the default. (O for all 3 variables)
+*/
+
+void Progress_RW(uint8_t mode)
+{
+	FILE* fp;
+	switch(mode)
+	{
+		/* Read progress from file */
+		case 0:
+			fp = fopen("./sv.sav", "rb");
+			if (fp)
+			{
+				fread(&select_menu, sizeof(char), sizeof(select_menu), fp);
+				fread(&list_menu, sizeof(char), sizeof(list_menu), fp);
+				fread(&select_cat, sizeof(char), sizeof(select_cat), fp);
+				fclose(fp);
+			}
+		break;
+		/* Write progress to file */
+		case 1:
+			fp = fopen("./sv.sav", "wb");
+			if (fp)
+			{
+				fwrite(&select_menu, sizeof(char), sizeof(select_menu), fp);
+				fwrite(&list_menu, sizeof(char), sizeof(list_menu), fp);
+				fwrite(&select_cat, sizeof(char), sizeof(select_cat), fp);
+				fclose(fp);
+			}
+		break;
+	}
+	
+}
+
 void MenuBrowser()
 {
 	static uint8_t state_b[2];
 	static uint8_t time_b[2];
 	uint8_t temp_string[512];
 	char yourpath[128];
-	static uint8_t select_cat = 0;
 	static uint16_t struct_totalsize = 0;
 	uint8_t i;
 	uint8_t done = 0;
 	
 	struct file_struct* structure_file;
-	structure_file = SetMenu(0, &struct_totalsize);
+	structure_file = SetMenu(select_cat, &struct_totalsize);
 	
 	list_all_files(currentdir,structure_file);
 	
@@ -306,11 +351,6 @@ void MenuBrowser()
 					time_b[i]++;
 					if (time_b[i] > 3)
 						state_b[i] = 1;
-					if (time_b[i] > 10)
-					{
-						state_b[i] = 0;
-						time_b[i] = 0;
-					}
 				}
 				else
 				{
@@ -406,7 +446,7 @@ void MenuBrowser()
 			Limit_FPS();
 		}
 		
-		if (emus[select_menu+list_menu].yes_search[0] == 'y' && (err == 1 || err == 4))
+		if (structure_file[select_menu+list_menu].yes_search[0] == 'y' && (err == 1 || err == 4))
 		{
 			/* Refresh again */
 			list_all_files(currentdir,structure_file);
@@ -421,6 +461,8 @@ void MenuBrowser()
 	if (img != NULL) SDL_FreeSurface(img);
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	SDL_Quit();
+	
+	Progress_RW(1);
 
 	if (err == 1 || err == 4)
 		chdir(DirName(structure_file[select_menu+list_menu].executable_path));
@@ -520,8 +562,9 @@ int32_t main(int32_t argc, int8_t* argv[])
 	
 	currentdir = getcwd(cwdbuf, 512);
 	
+	Progress_RW(0);
+	
 	MenuBrowser();
-
 
 	return 0;
 }
@@ -618,12 +661,12 @@ void controls()
 			case 2:
 				if (!(pad))
 				{
-					button_state[i] = 3;
+					button_state[i] = 0;
 					button_time[i] = 0;
 				}
 			break;
 			
-			case 3:
+			/*case 3:
 				button_time[i] = button_time[i] + 1;
 				
 				if (button_time[i] > 1)
@@ -631,7 +674,7 @@ void controls()
 					button_state[i] = 0;
 					button_time[i] = 0;
 				}
-			break;
+			break;*/
 		}
 		
 	}

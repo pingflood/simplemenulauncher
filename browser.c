@@ -41,7 +41,7 @@ extern int32_t select_menu, list_menu;
 extern uint8_t additional_file[MAX_NAME_SIZE];
 
 /* 4096 just in case they use big rom sets... We may never know !*/
-static int8_t file_name[1024][512];
+static int8_t file_name[4096][512];
 static int16_t file_type[OUR_PATH_MAX];
 static uint16_t fileid_selected = 0;
 static uint16_t choice = 0;
@@ -97,7 +97,7 @@ void list_all_files(int8_t* directory, struct file_struct* example)
 	int8_t* pch[3];
 	
 	/* Reset all the stored files to zero */
-	for(i=0;i<1024;i++)
+	for(i=0;i<4096;i++)
 	{
 		strncpy(file_name[i], "", 512);
 	}

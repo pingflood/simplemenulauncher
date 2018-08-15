@@ -1,9 +1,0 @@
-FFPLAY
-VIDEO PLAYER
-/mnt/int_sd/apps/ffplay/ffplay
-y
-.mp4,.roq,.avi,.mp3,.ogg,.flac,.mpg,.mkv,.webm,.wav,.cpk
-K
-icons/ffplay.png
-600
-===

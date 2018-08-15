@@ -5,7 +5,12 @@
 #include <SDL/SDL_image.h>
 #include "font.h"
 
-extern SDL_Surface* backbuffer;
+extern SDL_Surface *backbuffer, *screen;
+
+/*void ScaleUp()
+{
+	SDL_Flip(screen)
+}*/
 
 SDL_Surface* Load_Image(const int8_t* directory)
 {
@@ -48,9 +53,19 @@ void Print_text(SDL_Surface *tmp, int32_t x, int32_t y, uint8_t *text_ex, uint16
 	int32_t i = 0;
 	for (i=0;text_ex[i]!='\0';i++)
 	{
-		Put_sprite( tmp, x + (size * i), y, size, size, text_ex[i]-33);
+		Put_sprite( tmp, x + ((size-3) * i), y, size, size, text_ex[i]-33);
 	}
 }
+
+void Print_smalltext(SDL_Surface *tmp, int32_t x, int32_t y, uint8_t *text_ex, uint16_t color, uint16_t size)
+{
+	int32_t i = 0;
+	for (i=0;text_ex[i]!='\0';i++)
+	{
+		Put_sprite( tmp, x + ((size-2) * i), y, size, size, text_ex[i]-33);
+	}
+}
+
 
 void Draw_Rect(SDL_Surface* screen, int16_t x, int16_t y, uint16_t width, uint16_t height, uint16_t color)
 {

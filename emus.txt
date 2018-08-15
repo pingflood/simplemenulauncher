@@ -1,0 +1,272 @@
+BeebEm
+BBC MICRO Emulator
+/mnt/int_sd/emus/beebem/beebem
+n
+.dsk,.ssd,.zip,.dsd,.uef
+#
+icons/beebem.png
+600
+===
+Caprice32
+CPC Emulator
+/mnt/int_sd/emus/dingux_cap32/dingux-cap32
+n
+.ws,.wsc,.zip
+#
+icons/dingux_cap32.png
+600
+===
+DCastAway
+Atari ST Emulator
+/mnt/int_sd/emus/dcastaway/dcastaway
+n
+.rom,.bin,.zip
+#
+icons/dcastaway.png
+600
+===
+Dingux-2600
+ATARI 2600 Emulator
+/mnt/int_sd/emus/dingux_2600/dingux-2600
+y
+.rom,.bin,.zip
+#
+icons/dingux_2600.png
+600
+===
+DINGUX-ATARI
+ATARI 8-BITS Emulator
+/mnt/int_sd/emus/dingux_atari/dingux-atari
+n
+.rom,.bin,.zip
+#
+icons/dingux_atari.png
+600
+===
+DosBOX
+DOS Emulator
+/mnt/int_sd/emus/dosbox/dosbox.dge
+y
+.dos,.conf,.exe,.bat
+#
+icons/dosbox.png
+600
+===
+DumbSNES
+Try PocketSNES before this one
+/mnt/int_sd/emus/dumbsnes/run.dge
+y
+.smc,.sfc,.bin,.zip
+#
+icons/dumbsnes.png
+600
+===
+FBA-GCW0
+ARCADE Emulator
+/mnt/int_sd/emus/fba-gcw0/fbasdl.dge
+n
+.dbs,.dbs
+#
+icons/fba.png
+600
+===
+Fceux
+Nes emulator
+/mnt/int_sd/emus/fceux/fceux
+y
+.nes,.fds,.fdf,.bin,.zip,.rom
+#
+icons/fceux.png
+600
+===
+GnGeo
+NEO GEO Emulator
+/mnt/int_sd/emus/gngeo/gngeo
+n
+.rom,.bin,.zip,.int
+#
+icons/gngeo.png
+600
+===
+Gamebatte
+GB/GBC Emulator
+/mnt/int_sd/emus/gamebatte/gambatte_sdl
+y
+.gb,.gbc,.bin,.zip
+#
+icons/gamebatte.png
+600
+===
+Handy
+Atari Lynx Emulator
+/mnt/int_sd/emus/handy/handy320.dge
+y
+.lnx,.bin,.lyx,.zip,.elf
+#
+icons/handy.png
+600
+===
+JzIntv
+INTELLIVISION Emulator
+/mnt/int_sd/emus/jzintv/jzintv
+y
+.rom,.bin,.zip,.int
+#
+icons/dingux_2600.png
+600
+===
+
+
+MAME4ALL
+Arcade emulator
+/mnt/int_sd/emus/mame4all/mame4all.dge
+n
+.rom,.bin,.zip
+#
+icons/mame4all.png
+600
+===
+ONScripter
+VN Interpreter
+/mnt/int_sd/emus/ons/run.dge
+n
+.min,.zip,.bin
+#
+icons/ons.png
+600
+===
+OhBoy!
+GameBoy Emulator
+/mnt/int_sd/emus/ohboy/ohboy
+n
+.gb,.gbc,.zip
+#
+icons/ohboy.png
+600
+===
+OpenBOR
+Beat'em up engine
+/mnt/int_sd/emus/openbor/run.dge
+n
+.sna
+#
+icons/openbor.png
+600
+===
+Oswan
+Wonderswan Emulator
+/mnt/int_sd/emus/oswan/oswan.dge
+y
+.ws,.wsc,.zip
+#
+icons/oswan.png
+600
+===
+PCSX4ALL
+PSX Emulator
+/mnt/int_sd/emus/pcsx4all/pcsx4all
+y
+.cue,.pbp,.zip,.mds,.bin,.mdf,.iso,.cbn,.img
+-iso
+icons/pcsx4all.png
+630
+===
+Picodrive
+Megadrive emulator
+/mnt/int_sd/emus/picodrive/PicoDrive
+y
+.cue,.md,.32x,.smd,.sms,.bin,.zip
+#
+icons/picodrive.png
+600
+===
+PocketSNES
+SUPER NES Emulator
+/mnt/int_sd/emus/pocketsnes/PocketSNES
+y
+.smc,.sfc,.bin,.zip
+#
+icons/pocketsnes.png
+600
+===
+PokeMini
+Pokemon Mini emulator
+/mnt/int_sd/emus/pokemini/pokemini.dge
+n
+.min,.zip,.bin
+#
+icons/pokemini.png
+600
+===
+Race
+Neo Geo Pocket emulator
+/mnt/int_sd/emus/race_od/race-od.dge
+y
+.ngc,.ngp,.zip
+#
+icons/race_od.png
+600
+===
+ReGBA
+GBA Emulator
+/mnt/int_sd/emus/regba/regba
+y
+.gba,.agb,.zip
+#
+icons/regba.png
+600
+===
+SMS Plus GX
+MASTER_SYSTEM Emulator
+/mnt/int_sd/emus/sms_sdl/sms_sdl
+y
+.sms,.bin,.gg,.bin,.zip,.rom
+#
+icons/sms.png
+600
+===
+ScummVM
+Game engine Interpreter
+/mnt/int_sd/emus/scummvm/run.dge
+n
+.dbs,.dbs
+#
+icons/scummvm.png
+600
+===
+Temper
+PC-Engine emulator
+/mnt/int_sd/emus/temper/temper
+y
+.cue,.pce,.sgx,.zip
+#
+icons/temper.png
+600
+===
+UAE4ALL
+Amiga Emulator
+/mnt/int_sd/emus/uae4all/run.dge
+n
+.rom,.bin,.zip
+#
+icons/uae4all.png
+600
+===
+Unreal Speccy
+ZX Spectrum Emulator
+/mnt/int_sd/emus/speccy/speccy
+y
+.sna,z80,.szx,.rzx,.tap,.tzx,.csw,.trd,.scl,.fdi,.td0,.udi,.zip 
+#
+icons/speccy.png
+600
+===
+Vice
+C64 emulator
+/mnt/int_sd/emus/vice/x64.dge
+n
+.dos,.conf,.exe,.bat
+#
+icons/vice.png
+600
+===

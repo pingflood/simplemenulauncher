@@ -10,7 +10,7 @@ You can scroll through a list of files (taken from a text file) and execute them
 TODO
 ====
 
-Add another category for settings (Might not get added)
+Add another category for settings
 
 Add support for user-set overclocking (Not trivial)
 

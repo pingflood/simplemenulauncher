@@ -1,6 +1,5 @@
 *.o
 *.elf
 *.dge
-fceux.png
-oswan.png
 core
+*.sav

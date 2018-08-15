@@ -1,0 +1,495 @@
+Apricots
+Apricots Game
+/mnt/int_sd/games/apricots/run.dge
+n
+.wad
+#
+icons/apricots.png
+600
+===
+Arkanoid
+Arkanoid Game
+/mnt/int_sd/games/arkanoid/run.dge
+n
+.wad
+#
+icons/arkanoid.png
+600
+===
+Bermuda
+Bermuda Syndrome Game
+/mnt/int_sd/games/bermuda/run.dge
+n
+.wad
+#
+icons/bermuda.png
+600
+===
+Boulder
+Boulder Game
+/mnt/int_sd/games/boulder/run.dge
+n
+.wad
+#
+icons/boulder.png
+600
+===
+BlockOut 2
+BlockOut 2 Game
+/mnt/int_sd/games/blockout2/run.dge
+n
+.wad
+#
+icons/blockout2.png
+600
+===
+C-Dogs SDL
+C-Dogs SDL Game
+/mnt/int_sd/games/cdogs/cdogs-sdl
+n
+.wad
+#
+icons/cdogs.png
+600
+===
+Cannonball
+Outrun engine
+/mnt/int_sd/games/cannonball/run.dge
+n
+.wad
+#
+icons/cannonball.png
+600
+===
+CaveStory
+English translation
+/mnt/int_sd/games/cavestory/run.dge
+n
+.wad
+#
+icons/cavestory.png
+600
+===
+CaveStory CN
+Chinese translation
+/mnt/int_sd/games/cavestory_cn/run.dge
+n
+.wad
+#
+icons/cavestory.png
+600
+===
+CaveStory TW
+TW translation
+/mnt/int_sd/games/cavestory_tw/run.dge
+n
+.wad
+#
+icons/cavestory.png
+600
+===
+Chroma
+Chroma Game
+/mnt/int_sd/games/chroma/run.dge
+n
+.wad
+#
+icons/chroma.png
+600
+===
+Chocolate Doom
+Chocolate Doom Game
+/mnt/int_sd/games/chocolate-doom/run.dge
+y
+.wad,.deh
+#
+icons/chocolate-doom.png
+600
+===
+Chocolate Heretic
+Chocolate Heretic Game
+/mnt/int_sd/games/chocolate-heretic/run.dge
+y
+.wad,.deh
+#
+icons/chocolate-heretic.png
+600
+===
+Chocolate Hexen
+Chocolate Hexen Game
+/mnt/int_sd/games/chocolate-hexen/run.dge
+y
+.wad,.deh
+#
+icons/chocolate-hexen.png
+600
+===
+Chocolate Strife
+Chocolate Strife Game
+/mnt/int_sd/games/chocolate-strife/run.dge
+y
+.wad,.deh
+#
+icons/chocolate-strife.png
+600
+===
+Dark Light
+Dark Light game
+/mnt/int_sd/games/dlight/run.dge
+n
+.wad
+#
+icons/dlight.png
+600
+===
+Digger
+Digger Game
+/mnt/int_sd/games/digger/run.dge
+n
+.wad
+#
+icons/digger.png
+600
+===
+Drillux
+Mr. Driller Game
+/mnt/int_sd/games/mrdrillux/run.dge
+n
+.wad
+#
+icons/mrdrillux.png
+600
+===
+EcWolf
+Wolfenstein Game Engine 
+/mnt/int_sd/games/ecwolf/run.dge
+y
+.wl1,.wl6,.sod,.wad,.grp,.zip,.7z,.exe
+#
+icons/ecwolf.png
+600
+===
+EDuke32
+EDuke32 Game
+/mnt/int_sd/games/eduke32/run.dge
+n
+.wad
+#
+icons/eduke32.png
+600
+===
+Falling Time
+Falling Time Game
+/mnt/int_sd/games/fallingtime/run.dge
+n
+.wad
+#
+icons/fallingtime.png
+600
+===
+FreeBlocks
+FreeBlocks Game
+/mnt/int_sd/games/freeblocks/freeblocks
+n
+.wad
+#
+icons/freeblocks.png
+600
+===
+Ganbare
+Ganbare-Natsuki-San Game
+/mnt/int_sd/games/ganbare/run.dge
+n
+.wad
+#
+icons/ganbare.png
+600
+===
+Homing
+Homing Fever Game
+/mnt/int_sd/games/homing/run.dge
+n
+.wad
+#
+icons/homing.png
+600
+===
+JinYong
+JinYong Legend Game
+/mnt/int_sd/games/jinyong_legend/run.dge
+n
+.wad
+#
+icons/jinyong.png
+600
+===
+JinYong
+JinYong PSP Game
+/mnt/int_sd/games/jinyong_psp/jysdllua
+n
+.wad
+#
+icons/jinyong_psp.png
+600
+===
+Just4QIX
+Just4QIX Game
+/mnt/int_sd/games/just4qix/run.dge
+n
+.wad
+#
+icons/just4qix.png
+600
+===
+KETM
+KETM Game
+/mnt/int_sd/games/ketm/run.dge
+n
+.wad
+#
+icons/ketm.png
+600
+===
+Last Mission
+The Last Mission Game
+/mnt/int_sd/games/lastmission/run.dge
+n
+.wad
+#
+icons/lastmission.png
+600
+===
+Meritous
+Meritous Game
+/mnt/int_sd/games/meritous/run.dge
+n
+.wad
+#
+icons/meritous.png
+600
+===
+Noiz2sa
+Noiz2sa Game
+/mnt/int_sd/games/noiz2sa/noiz2sa.dge
+n
+.wad
+#
+icons/noiz2sa.png
+600
+===
+OpenTyrian
+OpenTyrian Game
+/mnt/int_sd/games/opentyrian/opentyrian
+n
+.wad
+#
+icons/opentyrian.png
+600
+===
+Overheated
+Overheated Game
+/mnt/int_sd/games/overheated/run.dge
+n
+.wad
+#
+icons/overheated.png
+600
+===
+Pang
+Pang Game
+/mnt/int_sd/games/pang/run.dge
+n
+.wad
+#
+icons/pang.png
+600
+===
+Profa
+ProfaDeluxe Game
+/mnt/int_sd/games/profadeluxe/run.dge
+n
+.wad
+#
+icons/profadeluxe.png
+600
+===
+Puzzletube
+Puzzletube game
+/mnt/int_sd/games/puzzletube/run.dge
+n
+.wad
+#
+icons/puzzletube.png
+600
+===
+Quake
+SDL Quake Game
+/mnt/int_sd/games/quake/sdlquake.dge
+n
+.wad
+#
+icons/quake.png
+600
+===
+Reminiscence
+Reminiscence Game
+/mnt/int_sd/games/reminiscence/rs
+n
+.wad
+#
+icons/reminiscence.png
+600
+===
+Rockbot
+Rockbot Game
+/mnt/int_sd/games/rockbot/run.dge
+n
+.wad
+#
+icons/rockbot.png
+600
+===
+Rott (Shareware)
+Rise Of The Triad SW Game
+/mnt/int_sd/games/rott/rott_sw
+n
+.wad
+#
+icons/ROTT.png
+600
+===
+Rott (Full)
+Requires full version data
+/mnt/int_sd/games/rott/rott
+n
+.wad
+#
+icons/ROTT.png
+600
+===
+SDLPAL
+SDLPAL Game
+/mnt/int_sd/games/sdlpal/run.dge
+n
+.wad
+#
+icons/sdlpal.png
+600
+===
+SDLPAL
+SDLPAL MHV Game
+/mnt/int_sd/games/sdlpal_mhv/run.dge
+n
+.wad
+#
+icons/sdlpal_mhv.png
+600
+===
+Shifty
+Shifty Game
+/mnt/int_sd/games/shifty/run.dge
+n
+.wad
+#
+icons/shifty.png
+600
+===
+Shisen Seki
+Shisen Seki Game
+/mnt/int_sd/games/shisen/run.dge
+n
+.wad
+#
+icons/shisen.png
+600
+===
+Snowman
+Snowman Game
+/mnt/int_sd/games/snowman/run.dge
+n
+.wad
+#
+icons/snowman.png
+600
+===
+Street of Rage R.
+SORR Game
+/mnt/int_sd/games/sorr/run.dge
+n
+.wad
+#
+icons/sorr.png
+600
+===
+Spartak
+Spartak Game
+/mnt/int_sd/games/spartak/run.dge
+n
+.wad
+#
+icons/spartak.png
+600
+===
+Spout
+Spout Game
+/mnt/int_sd/games/spout/run.dge
+n
+.wad
+#
+icons/spout.png
+600
+===
+Super DMCA War
+Super DMCA War Game
+/mnt/int_sd/games/smw/run.dge
+n
+.wad
+#
+icons/smw.png
+600
+===
+SuperTux
+SuperTux Game
+/mnt/int_sd/games/supertux/run.dge
+n
+.wad
+#
+icons/supertux.png
+600
+===
+Transball
+Super Transball 2 Game
+/mnt/int_sd/games/stransball2/run.dge
+n
+.wad
+#
+icons/stransball2.png
+600
+===
+Triple
+Triple Trapled Game
+/mnt/int_sd/games/triple/run.dge
+n
+.wad
+#
+icons/triple.png
+600
+===
+Tileworld
+Tileworld Game
+/mnt/int_sd/games/tileworld/tworld
+n
+.wad
+#
+icons/tworld.png
+600
+===
+Zelda
+Zelda Roth Game
+/mnt/int_sd/games/zelda_roth/run.dge
+n
+.wad
+#
+icons/zelda_roth.png
+600
+===

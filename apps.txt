@@ -1,0 +1,45 @@
+Dingoo Commander
+File Explorer
+/mnt/int_sd/apps/commander/run.dge
+n
+.mp4
+#
+icons/commander.png
+528
+===
+FFPlay
+Video Player
+/mnt/int_sd/apps/ffplay/ffplay
+y
+.mp4,.roq,.avi,.mp3,.ogg,.flac,.mpg,.mkv,.webm,.wav,.cpk
+#
+icons/ffplay.png
+600
+===
+GluTexto
+Text Editor
+/mnt/int_sd/apps/glutexto/run.dge
+n
+.mp4
+#
+icons/glutexto.png
+528
+===
+LGPT
+Track editor
+/mnt/int_sd/apps/lgbt/run.dge
+n
+.mp4
+#
+icons/lgbt.png
+528
+===
+O2xiv
+Image viewer
+/mnt/int_sd/apps/o2xiv/run.dge
+n
+.mp4
+#
+icons/o2xiv.png
+600
+===

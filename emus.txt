@@ -1,7 +1,7 @@
 BeebEm
 BBC MICRO Emulator
 /mnt/int_sd/emus/beebem/beebem
-n
+y
 .dsk,.ssd,.zip,.dsd,.uef
 #
 icons/beebem.png
@@ -115,8 +115,6 @@ y
 icons/dingux_2600.png
 600
 ===
-
-
 MAME4ALL
 Arcade emulator
 /mnt/int_sd/emus/mame4all/mame4all.dge

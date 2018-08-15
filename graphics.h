@@ -10,5 +10,6 @@ extern void Put_image(SDL_Surface* tmp, short x, short y);
 extern void Draw_Rect(SDL_Surface* screen, int16_t x, int16_t y, uint16_t width, uint16_t height, uint16_t color);
 extern void Print_smalltext(SDL_Surface *tmp, int32_t x, int32_t y, uint8_t *text_ex, uint16_t color, uint16_t size);
 extern void Limit_FPS();
+extern void ScaleUp();
 
 #endif

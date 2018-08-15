@@ -32,10 +32,10 @@
 #include "dirname.h"
 
 SDL_Surface *screen, *backbuffer;
-SDL_Surface *img, *font_bmp, *font_bmp_small;
+SDL_Surface *img, *font_bmp, *font_bmp_small, *menu_icons, *power_bmp;
 TTF_Font *gFont;
 
-uint8_t button_time[20], button_state[20];
+uint8_t button_time[15], button_state[15];
 
 /* Global buffer used to store temporarely the text files, 
 * i would like to avoid dealing with pointers as much as possible...
@@ -60,13 +60,6 @@ uint8_t* loop(uint8_t* name, uint32_t* position_file_byte)
 {
 	uint32_t i, a;
 	uint8_t tmp[OUR_PATH_MAX];
-	
-	// Looks for big character 'K', if found then it means that there's nothing to copy
-	if (name[0] == '#')
-	{
-		name[0] = '\0';
-		return name;
-	}
 	
 	for(a=*position_file_byte;a<*position_file_byte+MAX_NAME_SIZE;a++)
 	{
@@ -234,9 +227,38 @@ uint8_t prompt(uint8_t* text, uint8_t* yes_text, uint8_t* no_text)
 		Print_text(font_bmp, 64,96, no_text, COLOR_INACTIVE_ITEM, 16);
 		if (button_state[4] == 1) done = 1;
 		else if (button_state[8] == 1) done = 2;
-		SDL_SoftStretch(backbuffer, NULL, screen, NULL);
-		SDL_Flip(screen);
+		ScaleUp();
 	}
+	button_state[4] = 2;
+	button_state[8] = 2;
+	return done;
+}
+
+uint8_t prompt_img(SDL_Surface* img_todraw)
+{
+	uint8_t done;
+	done = 0;
+	/* Reset input values to 2 (aka HELD, just in case) */
+	button_state[4] = 2;
+	button_state[8] = 2;
+	while (done == 0) 
+	{
+		controls();
+		SDL_BlitSurface(img, NULL, backbuffer, NULL);
+		SDL_BlitSurface(img_todraw, NULL, backbuffer, NULL);
+		/* If A button is pressed */
+		if (button_state[4] == 1) done = 3;
+		/* If B button is pressed */
+		else if (button_state[8] == 1) done = 1;
+		/* If X button is pressed */
+		else if (button_state[13] == 1) done = 2;
+		/* If Y button is pressed */
+		else if (button_state[14] == 1) done = 5;
+		ScaleUp();
+	}
+	
+	printf("Done : %d\n", done);
+	
 	button_state[4] = 2;
 	button_state[8] = 2;
 	return done;
@@ -252,8 +274,7 @@ void USB_Mount_Loop()
 		Draw_Rect(backbuffer, 56, 24, 224, 96, COLOR_SELECT);
 		Print_text(font_bmp, 80,64, "USB MOUNTED", COLOR_INACTIVE_ITEM, 16);
 		if (button_state[5] == 1 || button_state[6] == 1 || button_state[8] == 1  || getUDCStatus() != UDC_CONNECT) done = 0;
-		SDL_SoftStretch(backbuffer, NULL, screen, NULL);
-		SDL_Flip(screen);
+		ScaleUp();
 	}
 }
 
@@ -363,6 +384,9 @@ void MenuBrowser()
 			Draw_Rect(backbuffer, 0, select_menu*38, 320, 39, 500);
 			Display_Files(&list_menu, structure_file);
 			
+			Draw_Rect(backbuffer, 224 + (select_cat * 32), 208, 32, 32, 1024);
+			Put_image(menu_icons, 224, 208);
+			
 			if (button_state[5] == 1)
 				USB_Mount();
 			
@@ -397,7 +421,8 @@ void MenuBrowser()
 			}
 			else if (button_state[1] == 1 || state_b[1] == 1) 
 			{
-				if (select_menu > 4)
+				/* We also need to make sure to check if the next list also has games left before allowing to scroll */
+				if (select_menu > 4 && (struct_totalsize > (list_menu)+6))
 				{
 					list_menu = list_menu + 6;
 					select_menu = 0;
@@ -419,7 +444,7 @@ void MenuBrowser()
 			}
 			else if (button_state[3] == 1) 
 			{
-				if (!((list_menu)+6 > struct_totalsize))
+				if (struct_totalsize > (list_menu)+6)
 				{
 					list_menu = list_menu + 6;
 					select_menu = 0;
@@ -441,13 +466,17 @@ void MenuBrowser()
 				if (err == 2 || err == 3) done = 1;
 			}
 					
-			SDL_SoftStretch(backbuffer, NULL, screen, NULL);
-			SDL_Flip(screen);
+			ScaleUp();
 			Limit_FPS();
 		}
 		
 		if (structure_file[select_menu+list_menu].yes_search[0] == 'y' && (err == 1 || err == 4))
 		{
+			/* User default user mount to /mnt */
+			#ifdef RS97
+			snprintf(currentdir, 512, "/mnt/");
+			chdir(currentdir);
+			#endif
 			/* Refresh again */
 			list_all_files(currentdir,structure_file);
 			err = File_Browser_file(structure_file);
@@ -462,6 +491,8 @@ void MenuBrowser()
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	SDL_Quit();
 	
+	/* Hack, we need to use the executable's directory rather than that shit */
+	chdir("/mnt/int_sd/apps/smenu");
 	Progress_RW(1);
 
 	if (err == 1 || err == 4)
@@ -479,9 +510,9 @@ void MenuBrowser()
 			 * */
 			Unmount_all();
 			if (err == 2)
-			snprintf(temp_string, sizeof(temp_string), "exec /sbin/reboot -f");
+				snprintf(temp_string, sizeof(temp_string), "exec /sbin/reboot -f");
 			else
-			snprintf(temp_string, sizeof(temp_string), "exec /sbin/poweroff -f");
+				snprintf(temp_string, sizeof(temp_string), "exec /sbin/poweroff -f");
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
 		/* Launch the executable 
@@ -490,9 +521,11 @@ void MenuBrowser()
 		 * They should be avoided whetever possible. This one is most suited for games.
 		 * */
 		case 1:
-			//snprintf(yourpath, sizeof(yourpath), "%s", DirName(structure_file[select_menu+list_menu].executable_path));
 			SetCPU(structure_file[select_menu+list_menu].real_clock_speed);
-			snprintf(temp_string, sizeof(temp_string), "%s %s", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline);
+			if (structure_file[select_menu+list_menu].commandline[0] == '#')
+				snprintf(temp_string, sizeof(temp_string), "\"%s\" \"%s\"", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline);
+			else
+				snprintf(temp_string, sizeof(temp_string), "\"%s\"", structure_file[select_menu+list_menu].executable_path);
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
 		/* Same, except that we also need to parse the additional file.
@@ -500,7 +533,10 @@ void MenuBrowser()
 		 * */
 		case 4:
 			SetCPU(structure_file[select_menu+list_menu].real_clock_speed);
-			snprintf(temp_string, sizeof(temp_string), "%s %s \"%s\"", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline, additional_file);
+			if (structure_file[select_menu+list_menu].commandline[0] == '#')
+				snprintf(temp_string, sizeof(temp_string), "\"%s\" \"%s\"", structure_file[select_menu+list_menu].executable_path, additional_file);
+			else
+				snprintf(temp_string, sizeof(temp_string), "\"%s\" \"%s\" \"%s\"", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline, additional_file);
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
 	}
@@ -548,8 +584,10 @@ int32_t main(int32_t argc, int8_t* argv[])
 	TTF_SetFontStyle(gFont, TTF_STYLE_NORMAL);
 	
 	img = Load_Image("background.bmp");
+	menu_icons = Load_Image("menu_icons.png");
 	font_bmp = Load_Image("font.png");
 	font_bmp_small = Load_Image("font_small.png");
+	power_bmp = Load_Image("power.png");
 	
 	HW_Init();
 	Increase_Backlight();
@@ -635,6 +673,12 @@ void controls()
 			break;
 			case 12:
 			pad = PAD_HOME;
+			break;
+			case 13:
+			pad = PAD_X;
+			break;
+			case 14:
+			pad = PAD_Y;
 			break;
 		}
 		

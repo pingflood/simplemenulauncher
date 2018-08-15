@@ -47,6 +47,24 @@
 #define PAD_BRIGHTNESS		keystate[SDLK_3]
 #define PAD_HOME		keystate[SDLK_END]
 
+#define PAD_X		keystate[SDLK_SPACE]
+#define PAD_Y		keystate[SDLK_LSHIFT]
+/*
+	case 0: pad = PAD_UP;
+	case 1: pad = PAD_DOWN;
+	case 2: pad = PAD_LEFT;
+	case 3: pad = PAD_RIGHT;
+	case 4: pad = PAD_CONFIRM; A
+	case 5: pad = PAD_CONFIRM2;
+	case 6: pad = PAD_QUIT; Y
+	case 7: pad = PAD_DELETE;
+	case 8: pad = PAD_CANCEL; B
+	case 9: pad = PAD_LEFT_SHOULDER;
+	case 10: pad = PAD_RIGHT_SHOULDER;
+	case 11: pad = PAD_BRIGHTNESS;
+	case 12: pad = PAD_HOME; X
+*/
+
 #define BLUE_C  255
 #define BLUE_C_SH  254
 #define RED_C  1700

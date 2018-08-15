@@ -7,20 +7,16 @@
 
 extern SDL_Surface *backbuffer, *screen;
 
-/*void ScaleUp()
+void ScaleUp()
 {
-	SDL_Flip(screen)
-}*/
+	SDL_SoftStretch(backbuffer, NULL, screen, NULL);
+	SDL_Flip(screen);
+}
 
 SDL_Surface* Load_Image(const int8_t* directory)
 {
-	SDL_Surface *tmp, *tmp2;
+	SDL_Surface *tmp;
 	tmp = IMG_Load(directory);
-	
-	//SDL_SetColorKey(tmp, (SDL_SRCCOLORKEY | SDL_RLEACCEL), SDL_MapRGB(tmp->format, 255, 0, 255));
-	//tmp2 = SDL_DisplayFormat(tmp);
-	//SDL_FreeSurface(tmp);
-
 	return tmp;
 }
 

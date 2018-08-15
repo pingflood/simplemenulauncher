@@ -129,41 +129,45 @@ void list_all_files(int8_t* directory, struct file_struct* example)
 			
 			/* Check if file in question is a folder */
 			isit_a_directory = is_folder(ent->d_name);	
-			present[0] = (pch[1] == NULL && pch[2] == NULL && pc != 0 ) ? 1 : 0;
+			present[0] = (pch[1] == NULL && pch[2] == NULL && pc != 0) ? 1 : 0;
 			
 			if (present[0] == 1)
 			{
 				present[1] = 0;
-				/* Let's look for the extension in our file */
-				for(e=0;e<example[list_menu+select_menu].howmuchext;e++)
+				/* We need to make sure to also hide the "." directories in order to avoid further clutter. */
+				if (!(ent->d_name[0] == '.' && ent->d_name[1] != '.'))
 				{
-					if (strstr (ent->d_name, example[list_menu+select_menu].ext[e]) != NULL) 
+					/* Let's look for the extension in our file */
+					for(e=0;e<example[list_menu+select_menu].howmuchext;e++)
 					{
-						present[1] = 1;
-						break;
+						if (strstr (ent->d_name, example[list_menu+select_menu].ext[e]) != NULL) 
+						{
+							present[1] = 1;
+							break;
+						}
 					}
-				}
-				
-				if (isit_a_directory == 1 || present[1] == 1)
-				{
-						/* Copy string cotent from ent->d_name to file_name[i] */
-						strncpy(file_name[i], ent->d_name, 512);
-						
-						if (present[1] == 1)
-						{
-							file_type[i] = BLUE_C;
-						}
-						else if (isit_a_directory == 1)
-						{
-							file_type[i] = F_C;
-						}
-						else
-						{
-							file_type[i] = WHITE_C;
-						}
+					
+					if (isit_a_directory == 1 || present[1] == 1)
+					{
+							/* Copy string cotent from ent->d_name to file_name[i] */
+							strncpy(file_name[i], ent->d_name, 512);
+							
+							if (present[1] == 1)
+							{
+								file_type[i] = BLUE_C;
+							}
+							else if (isit_a_directory == 1)
+							{
+								file_type[i] = F_C;
+							}
+							else
+							{
+								file_type[i] = WHITE_C;
+							}
 
-						i++;
-						numb_files++;
+							i++;
+							numb_files++;
+					}
 				}
 			}
 			
@@ -180,11 +184,6 @@ void clear_entirescreen()
 	Draw_Rect(backbuffer, 0, 0, 320, 240, 0);
 }
 
-void update_entirescreen()
-{
-	SDL_SoftStretch(backbuffer, NULL, screen, NULL);
-	SDL_Flip(screen);
-}
 
 void set_fileid()
 {
@@ -245,7 +244,7 @@ void refresh_cursor(uint8_t filemode)
 	{
 		Draw_TTF_Text(currentdir, 8, 16);
 	}
-	update_entirescreen();
+	ScaleUp();
 }
 
 
@@ -294,11 +293,13 @@ static void Controls_filebrowser()
 			time_b[i]++;
 			if (time_b[i] > 3)
 				state_b[i] = 1;
+			/*if (time_b[i] > 3)
+				state_b[i] = 1;
 			if (time_b[i] > 4)
 			{
 				state_b[i] = 0;
 				time_b[i] = 0;
-			}
+			}*/
 		}
 		else
 		{
@@ -308,7 +309,7 @@ static void Controls_filebrowser()
 	}
 	
 	/* If Up button is pressed down... (or Left button held) */
-	if (button_state[0] == 1 || state_b[0] == 1)
+	if (button_state[0] == 1 || button_state[2] == 1 || state_b[0] == 1)
 	{
 		if (choice > 0) 
 		{
@@ -325,7 +326,7 @@ static void Controls_filebrowser()
 		}
 	}
 	/* If Down button is pressed down... (or Right button held) */
-	else if (button_state[1] == 1 || state_b[1] == 1)
+	else if (button_state[1] == 1 || button_state[3] == 1 || state_b[1] == 1)
 	{
 		/* Don't let the user to scroll more than there are files... */
 		if (fileid_selected < numb_files)

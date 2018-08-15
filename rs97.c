@@ -25,7 +25,7 @@
 
 #include "rs97.h"
 
-extern SDL_Surface *screen, *backbuffer, *img;
+extern SDL_Surface *screen, *backbuffer, *img, *power_bmp;
 
 /* RS-97 specific things */
 uint8_t tvout_enabled = 0, sdcard_mount = 0;
@@ -256,12 +256,24 @@ void Unmount_all()
 uint8_t Shutdown()
 {
 	uint8_t done;
-	done = prompt("SHUTDOWN?", "A BUTTON: YES", "B BUTTON: NO");
-	if (done == 1) return 3;
+	
+	/* If you can't load Power button's image then fallback to text*/
+	if (!power_bmp)
+	{
+		done = prompt("SHUTDOWN?", "A BUTTON: YES", "B BUTTON: NO");
+		if (done == 1) return 3;
+		else
+		{
+			done = prompt("REBOOT THEN?", "A BUTTON: YES", "B BUTTON: NO");
+			if (done == 1) return 2;
+		}
+	}
+	/* If not then show dem the improved menu */
 	else
 	{
-		done = prompt("REBOOT THEN?", "A BUTTON: YES", "B BUTTON: NO");
-		if (done == 1) return 2;
+		done = prompt_img(power_bmp);
+		if (done == 1) return 0;
+		else return done;
 	}
 	
 	return 0;

@@ -84,7 +84,7 @@ struct file_struct
 	uint8_t description[MAX_NAME_SIZE];
 	uint8_t executable_path[OUR_PATH_MAX];
 	uint8_t yes_search[2];
-	uint8_t ext[16][MAX_NAME_SIZE];
+	uint8_t ext[64][MAX_NAME_SIZE];
 	uint8_t howmuchext;
 	uint8_t commandline[MAX_NAME_SIZE];
 	uint8_t icon_path[OUR_PATH_MAX];

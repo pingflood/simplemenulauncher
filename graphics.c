@@ -6,6 +6,7 @@
 #include "font.h"
 
 extern SDL_Surface *backbuffer, *screen, *img;
+static uint32_t start = 0;
 
 SDL_Surface* Load_Image(const int8_t* directory)
 {
@@ -43,7 +44,7 @@ void Print_text(SDL_Surface *tmp, int32_t x, int32_t y, uint8_t *text_ex, uint16
 	int32_t i = 0;
 	for (i=0;text_ex[i]!='\0';i++)
 	{
-		Put_sprite( tmp, x + ((size-3) * i), y, size, size, text_ex[i]-33);
+		Put_sprite( tmp, x + ((size-5) * i), y, size, size, text_ex[i]-33);
 	}
 }
 
@@ -86,18 +87,12 @@ void ScaleUp()
 	SDL_SoftStretch(backbuffer, NULL, screen, NULL);
 	#endif
 	SDL_Flip(screen);
+	if((1000.0f/60.0f) > SDL_GetTicks()-start) SDL_Delay((1000.0f/60.0f)-(SDL_GetTicks()-start));	
+	start = SDL_GetTicks();
 }
 
 void Display_Background()
 {
 	if (img) SDL_BlitSurface(img, NULL, backbuffer, NULL);
 	else Draw_Rect(backbuffer, 0, 0, 320, 240, 0);
-}
-
-/* Framerate limiter, This is the only SDL_Delay that we'll need */
-void Limit_FPS()
-{
-	uint32_t start;
-	start = SDL_GetTicks();
-	if((1000.0f/60.0f) > SDL_GetTicks()-start) SDL_Delay((1000.0f/60.0f)-(SDL_GetTicks()-start));	
 }

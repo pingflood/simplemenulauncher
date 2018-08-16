@@ -291,7 +291,7 @@ static void Controls_filebrowser()
 		if (button_state[i] == 2)
 		{
 			time_b[i]++;
-			if (time_b[i] > 3)
+			if (time_b[i] > 4)
 				state_b[i] = 1;
 		}
 		else
@@ -390,7 +390,6 @@ int32_t File_Browser_file(struct file_struct* example)
 				return 4;
 			}
 		}
-		Limit_FPS();
 	}
 	
 	return 0;

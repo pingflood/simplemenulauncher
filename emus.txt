@@ -2,7 +2,7 @@ BeebEm
 BBC MICRO Emulator
 /mnt/int_sd/emus/beebem/beebem
 y
-.dsk,.ssd,.zip,.dsd,.uef,.img
+.dsk,.ssd,.zip,.dsd,.uef,.img,.DSK,.SSD,.ZIP,.DSD,.UEF,.IMG
 #
 icons/beebem.png
 600
@@ -11,7 +11,7 @@ Caprice32
 CPC Emulator
 /mnt/int_sd/emus/dingux_cap32/dingux-cap32
 n
-.ws,.wsc,.zip
+.ws
 #
 icons/dingux_cap32.png
 600
@@ -20,7 +20,7 @@ DCastAway
 Atari ST Emulator
 /mnt/int_sd/emus/dcastaway/dcastaway
 n
-.rom,.bin,.zip
+.rom
 #
 icons/dcastaway.png
 600
@@ -29,7 +29,7 @@ Dingux-2600
 ATARI 2600 Emulator
 /mnt/int_sd/emus/dingux_2600/dingux-2600
 y
-.rom,.bin,.zip
+.rom,.bin,.zip,.a26,.ROM,.BIN,.ZIP,.A26
 #
 icons/dingux_2600.png
 600
@@ -47,7 +47,7 @@ DosBOX
 DOS Emulator
 /mnt/int_sd/emus/dosbox/dosbox.dge
 y
-.dos,.conf,.exe,.bat
+.dos,.conf,.exe,.bat,.DOS,.CONF,.EXE,.BAT
 #
 icons/dosbox.png
 600
@@ -56,7 +56,7 @@ DumbSNES
 Try PocketSNES before this one
 /mnt/int_sd/emus/dumbsnes/run.dge
 y
-.smc,.sfc,.bin,.zip
+.smc,.sfc,.bin,.zip,.SMC,.SFC,.BIN,.ZIP
 #
 icons/dumbsnes.png
 600
@@ -65,7 +65,7 @@ FBA-GCW0
 ARCADE Emulator
 /mnt/int_sd/emus/fba-gcw0/fbasdl.dge
 n
-.dbs,.dbs
+.dbs
 #
 icons/fba.png
 600
@@ -74,7 +74,7 @@ Fceux
 Nes emulator
 /mnt/int_sd/emus/fceux/fceux
 y
-.nes,.fds,.fdf,.bin,.zip,.rom
+.nes,.fds,.fdf,.bin,.zip,.rom,.NES,.FDS,.FDF,.BIN,.ZIP,.ROM
 #
 icons/fceux.png
 600
@@ -83,7 +83,7 @@ GnGeo
 NEO GEO Emulator
 /mnt/int_sd/emus/gngeo/gngeo
 n
-.rom,.bin,.zip,.int
+.rom
 #
 icons/gngeo.png
 600
@@ -92,7 +92,7 @@ Gamebatte
 GB/GBC Emulator
 /mnt/int_sd/emus/gamebatte/gambatte_sdl
 y
-.gb,.gbc,.bin,.zip
+.gb,.gbc,.bin,.zip,.GB,.GBC,.BIN,.ZIP
 #
 icons/gamebatte.png
 600
@@ -101,7 +101,7 @@ Handy
 Atari Lynx Emulator
 /mnt/int_sd/emus/handy/handy320.dge
 y
-.lnx,.bin,.lyx,.zip,.elf
+.lnx,.bin,.lyx,.zip,.elf,.LNX,.BIN,.LYX,.ZIP,.ELF
 #
 icons/handy.png
 600
@@ -110,7 +110,7 @@ JzIntv
 INTELLIVISION Emulator
 /mnt/int_sd/emus/jzintv/jzintv
 y
-.rom,.bin,.zip,.int
+.rom,.bin,.zip,.int,.ROM,.BIN,.ZIP,.INT
 #
 icons/dingux_2600.png
 600
@@ -119,7 +119,7 @@ MAME4ALL
 Arcade emulator
 /mnt/int_sd/emus/mame4all/mame4all.dge
 n
-.rom,.bin,.zip
+.rom
 #
 icons/mame4all.png
 600
@@ -128,7 +128,7 @@ ONScripter
 VN Interpreter
 /mnt/int_sd/emus/ons/run.dge
 n
-.min,.zip,.bin
+.min
 #
 icons/ons.png
 600
@@ -137,7 +137,7 @@ OhBoy!
 GameBoy Emulator
 /mnt/int_sd/emus/ohboy/ohboy
 n
-.gb,.gbc,.zip
+.gb,.gbc,.zip,.GB,.GBC,.ZIP
 #
 icons/ohboy.png
 600
@@ -155,7 +155,7 @@ Oswan
 Wonderswan Emulator
 /mnt/int_sd/emus/oswan/oswan.dge
 y
-.ws,.wsc,.zip
+.ws,.wsc,.zip,.WS,.WSC,.ZIP
 #
 icons/oswan.png
 600
@@ -164,7 +164,7 @@ PCSX4ALL
 PSX Emulator
 /mnt/int_sd/emus/pcsx4all/pcsx4all
 y
-.cue,.pbp,.zip,.mds,.bin,.mdf,.iso,.cbn,.img
+.cue,.pbp,.zip,.mds,.bin,.mdf,.iso,.cbn,.img,.CUE,.PBP,.ZIP,.MDS,.BIN,.MDF,.ISO,.CBN,.IMG
 -iso
 icons/pcsx4all.png
 600
@@ -173,7 +173,7 @@ Picodrive
 Megadrive emulator
 /mnt/int_sd/emus/picodrive/PicoDrive
 y
-.cue,.md,.32x,.smd,.sms,.bin,.zip
+.cue,.md,.32x,.smd,.sms,.bin,.zip,.CUE,.MD,.32X,.SMD,.SMS,.BIN,.ZIP
 #
 icons/picodrive.png
 600
@@ -182,7 +182,7 @@ PocketSNES
 SUPER NES Emulator
 /mnt/int_sd/emus/pocketsnes/PocketSNES
 y
-.smc,.sfc,.bin,.zip
+.smc,.sfc,.bin,.zip,.SMC,.SFC,.BIN,.ZIP
 #
 icons/pocketsnes.png
 600
@@ -191,7 +191,7 @@ PokeMini
 Pokemon Mini emulator
 /mnt/int_sd/emus/pokemini/pokemini.dge
 n
-.min,.zip,.bin
+.min,.zip,.bin,.MIN,.ZIP,.BIN
 #
 icons/pokemini.png
 600
@@ -200,7 +200,7 @@ Race
 Neo Geo Pocket emulator
 /mnt/int_sd/emus/race_od/race-od.dge
 y
-.ngc,.ngp,.zip
+.ngc,.ngp,.zip,.NGC,.NGP,.ZIP
 #
 icons/race_od.png
 600
@@ -209,7 +209,7 @@ ReGBA
 GBA Emulator
 /mnt/int_sd/emus/regba/regba
 y
-.gba,.agb,.zip
+.gba,.agb,.zip,.GBA,.AGB,.ZIP
 #
 icons/regba.png
 600
@@ -218,7 +218,7 @@ SMS Plus GX
 MASTER_SYSTEM Emulator
 /mnt/int_sd/emus/sms_sdl/sms_sdl
 y
-.sms,.bin,.gg,.bin,.zip,.rom
+.sms,.bin,.gg,.bin,.zip,.rom,.SMS,.BIN,.GG,.BIN,.ZIP,.ROM
 #
 icons/sms.png
 600
@@ -227,7 +227,7 @@ ScummVM
 Game engine Interpreter
 /mnt/int_sd/emus/scummvm/run.dge
 n
-.dbs,.dbs
+.dbs
 #
 icons/scummvm.png
 600
@@ -236,7 +236,7 @@ Temper
 PC-Engine emulator
 /mnt/int_sd/emus/temper/temper
 y
-.cue,.pce,.sgx,.zip
+.cue,.pce,.sgx,.zip,.CUE,.PCE,.SGX,.ZIP
 #
 icons/temper.png
 600
@@ -245,7 +245,7 @@ UAE4ALL
 Amiga Emulator
 /mnt/int_sd/emus/uae4all/run.dge
 n
-.rom,.bin,.zip
+.rom
 #
 icons/uae4all.png
 600
@@ -254,7 +254,7 @@ Unreal Speccy
 ZX Spectrum Emulator
 /mnt/int_sd/emus/speccy/speccy
 y
-.sna,z80,.szx,.rzx,.tap,.tzx,.csw,.trd,.scl,.fdi,.td0,.udi,.zip 
+.sna,z80,.szx,.rzx,.tap,.tzx,.csw,.trd,.scl,.fdi,.td0,.udi,.zip,.SNA,Z80,.SZX,.RZX,.TAP,.TZX,.CSW,.TRD,.SCL,.FDI,.TD0,.UDI,.ZIP
 #
 icons/speccy.png
 600
@@ -263,7 +263,7 @@ Vice
 C64 emulator
 /mnt/int_sd/emus/vice/x64.dge
 n
-.dos,.conf,.exe,.bat
+.dos
 #
 icons/vice.png
 600

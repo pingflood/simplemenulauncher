@@ -101,7 +101,7 @@ Chocolate Doom
 Chocolate Doom Game
 /mnt/int_sd/games/chocolate-doom/run.dge
 y
-.wad,.deh
+.wad,.deh,.WAD,.DEH
 #
 icons/chocolate-doom.png
 600
@@ -110,7 +110,7 @@ Chocolate Heretic
 Chocolate Heretic Game
 /mnt/int_sd/games/chocolate-heretic/run.dge
 y
-.wad,.deh
+.wad,.deh,.WAD,.DEH
 #
 icons/chocolate-heretic.png
 600
@@ -119,7 +119,7 @@ Chocolate Hexen
 Chocolate Hexen Game
 /mnt/int_sd/games/chocolate-hexen/run.dge
 y
-.wad,.deh
+.wad,.deh,.WAD,.DEH
 #
 icons/chocolate-hexen.png
 600
@@ -128,7 +128,7 @@ Chocolate Strife
 Chocolate Strife Game
 /mnt/int_sd/games/chocolate-strife/run.dge
 y
-.wad,.deh
+.wad,.deh,.WAD,.DEH
 #
 icons/chocolate-strife.png
 600
@@ -164,7 +164,7 @@ EcWolf
 Wolfenstein Game Engine 
 /mnt/int_sd/games/ecwolf/run.dge
 y
-.wl1,.wl6,.sod,.wad,.grp,.zip,.7z,.exe
+.wl1,.wl6,.sod,.wad,.grp,.zip,.7z,.exe,.WL1,.WL6,.SOD,.WAD,.GRP,.ZIP,.7Z,.EXE
 #
 icons/ecwolf.png
 600

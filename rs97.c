@@ -82,6 +82,9 @@ static uint16_t getBatteryLevel()
 {
 	int32_t val;
 #ifdef RS97
+	/* If plugged to USB, then use charging icon */
+	if (getUDCStatus() == UDC_CONNECT) return 6;
+	
 	val = getBatteryStatus();
 	if (val > 4500) val = 4500;
 	else if (val < 0) val = 0;
@@ -99,7 +102,7 @@ void Battery_Status()
 		check_battery = 0;
 		battery_level = getBatteryLevel();
 	}
-	Put_sprite(battery_icon, 304, 0, 16, 16, 0);
+	Put_sprite(battery_icon, 0, 224, 16, 16, battery_level);
 }
 
 void HW_Init()

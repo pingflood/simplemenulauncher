@@ -33,7 +33,7 @@
 
 SDL_Surface *screen, *backbuffer;
 SDL_Surface *img, *font_bmp, *font_bmp_small, *menu_icons, *power_bmp, *usb_bmp[2], *selector_bmp, *battery_icon;
-SDL_Surface *help_gfx, *help_icon, *chip_bmp;
+SDL_Surface *help_gfx, *help_icon, *chip_bmp, *bar_bmp;
 TTF_Font *gFont;
 
 uint8_t button_time[15], button_state[15];
@@ -45,8 +45,8 @@ uint8_t *buf, *cwdbuf;
 /* Used to determine whetever we should shutdown, execute app etc..*/
 uint8_t err;
 
-/* used to store our selection in the menu's browser */
-int32_t select_menu = 0, list_menu = 0;
+/* used to store our selection in the menu's browser. It's set to 2 and -2 for the scrolling */
+int32_t select_menu = 2, list_menu = -2;
 uint8_t additional_file[MAX_NAME_SIZE];
 
 int8_t* currentdir;
@@ -98,7 +98,7 @@ void Fill_Element(int sz, struct file_struct* example, uint16_t* totalsize)
 		sprintf(example[e].executable_path, "%s", loop(example[e].executable_path, &lastpos));
 		sprintf(example[e].yes_search, "%s", loop(example[e].yes_search, &lastpos));
 		
-		for(i=0;i<16;i++)
+		for(i=0;i<64;i++)
 		{
 			for(a=lastpos;a<lastpos+MAX_NAME_SIZE;a++)
 			{
@@ -113,7 +113,7 @@ void Fill_Element(int sz, struct file_struct* example, uint16_t* totalsize)
 				{
 					lastpos = a + 2;
 					example[e].howmuchext = i + 1;
-					i = 17;
+					i = 65;
 					break;
 				}
 			}
@@ -530,12 +530,14 @@ void MenuBrowser()
 			Draw_Rect(backbuffer, 0, select_menu*38, 320, 39, 500);
 			Display_Files(&list_menu, structure_file);
 			
-			if (selector_bmp) Put_image(selector_bmp, 224 + (select_cat * 32), 199);
-			else Draw_Rect(backbuffer, 224 + (select_cat * 32), 208, 32, 32, 1024);
-			Put_image(menu_icons, 224, 208);
+			Put_image(bar_bmp, 0, 224);
 			
-			Put_image(help_icon, 301, 24);
-			Put_sprite(battery_icon, 304, 0, 16, 16, 0);
+			if (selector_bmp) Put_image(selector_bmp, 112 + (select_cat * 32), 199);
+			else Draw_Rect(backbuffer, 224 + (select_cat * 32), 208, 32, 32, 1024);
+			
+			Put_image(menu_icons, 112, 208);
+			Put_image(help_icon, 266, 214);
+			
 			Battery_Status();
 			
 			if (button_state[5] == 1)
@@ -551,60 +553,62 @@ void MenuBrowser()
 			if (button_state[9] == 1)
 			{
 				if (select_cat > 0) select_cat--;
-				list_menu = 0;
-				select_menu = 0;
+				list_menu = -2;
+				select_menu = 2;
 				structure_file = SetMenu(select_cat, &struct_totalsize);
 			}
 			/* R shoulder */
 			else if (button_state[10] == 1)
 			{
 				if (select_cat < 2) select_cat++;
-				list_menu = 0;
-				select_menu = 0;
+				list_menu = -2;
+				select_menu = 2;
 				structure_file = SetMenu(select_cat, &struct_totalsize);
 			}
-					
+			
+
 			if (button_state[0] == 1 || state_b[0] == 1) 
 			{
-				if (select_menu == 0 && list_menu > 0)
+				if ((list_menu)+(select_menu) > 0)
 				{
-					list_menu = list_menu - 6;
-					select_menu = 5;
-				}
-				else if (select_menu > 0) 
-				{
-					select_menu--;
+					list_menu--;
+					select_menu = 2;
 				}
 			}
 			else if (button_state[1] == 1 || state_b[1] == 1) 
 			{
 				/* We also need to make sure to check if the next list also has games left before allowing to scroll */
-				if (select_menu > 4 && (struct_totalsize > (list_menu)+6))
+				if ((list_menu+select_menu+1) < struct_totalsize)
 				{
-					list_menu = list_menu + 6;
-					select_menu = 0;
-				}
-				else if (select_menu < 5)
-				{
-					if (!((select_menu+list_menu)+2 > struct_totalsize))
-					select_menu++;
+					list_menu++;
+					select_menu = 2;
 				}
 			}
 			
 			if (button_state[2] == 1) 
 			{
-				if (list_menu > 0)
+				if ((list_menu)+(select_menu)-4 > 0)
 				{
-					list_menu = list_menu - 6;
-					select_menu = 0;
+					list_menu = list_menu - 4;
+					select_menu = 2;
+				}
+				else
+				{
+					select_menu = 2;
+					list_menu = -2;
 				}
 			}
 			else if (button_state[3] == 1) 
 			{
-				if (struct_totalsize > (list_menu)+6)
+				if ((list_menu+select_menu+4) < struct_totalsize)
 				{
-					list_menu = list_menu + 6;
-					select_menu = 0;
+					list_menu = list_menu + 4;
+					select_menu = 2;
+				}
+				else
+				{
+					select_menu = 2;
+					list_menu = struct_totalsize - 3;
 				}
 			}
 			
@@ -624,7 +628,6 @@ void MenuBrowser()
 			}
 					
 			ScaleUp();
-			Limit_FPS();
 		}
 		
 		if (structure_file[select_menu+list_menu].yes_search[0] == 'y' && (err == 1 || err == 4))
@@ -656,6 +659,7 @@ void MenuBrowser()
 	if (help_gfx != NULL) SDL_FreeSurface(help_gfx);
 	if (help_icon != NULL) SDL_FreeSurface(help_icon);
 	if (chip_bmp != NULL) SDL_FreeSurface(chip_bmp);
+	if (bar_bmp != NULL) SDL_FreeSurface(bar_bmp);
 	
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	SDL_Quit();
@@ -769,9 +773,10 @@ int32_t main(int32_t argc, int8_t* argv[])
 	selector_bmp = Load_Image("gfx/selector.png");
 	battery_icon = Load_Image("gfx/battery.png");
 	
-	help_icon = Load_Image("gfx/help_button.png");
+	help_icon = Load_Image("gfx/help_bar.png");
 	help_gfx = Load_Image("gfx/help.png");
 	chip_bmp = Load_Image("gfx/chip.png");
+	bar_bmp = Load_Image("gfx/grey_bar.png");
 	
 	HW_Init();
 	Increase_Backlight();

@@ -10,13 +10,13 @@ You can scroll through a list of files (taken from a text file) and execute them
 TODO
 ====
 
-Add another category for settings
-
-Add support for user-set overclocking (Not trivial)
+Add another category for settings (What for ? Wallpapers ?)
 
 
 Ticked off the list
 ====================
+
+Add support for user-set overclocking -  DONE, can also be saved
 
 TV Out support - DONE, fixed
 

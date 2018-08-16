@@ -258,8 +258,6 @@ uint8_t prompt_img(SDL_Surface* img_todraw)
 		ScaleUp();
 	}
 	
-	printf("Done : %d\n", done);
-	
 	button_state[4] = 2;
 	button_state[8] = 2;
 	return done;
@@ -295,10 +293,63 @@ void USB_Mount_Loop()
 	}
 }
 
+/* This writes back the settings and changes done in memory to the file again.
+ * Used for changing overclock settings. It should still be safer than GMenuNext/GMenu2x in any cases.
+ * */
+void Write_Settings(uint8_t category)
+{
+	uint16_t totalsize_ = 0;
+	uint16_t e, i;
+	struct file_struct* example;
+	FILE* fp;
+	
+	/* HACK, we need to retrieve it from argv[0] instead */
+	chdir("/mnt/int_sd/apps/smenu");
+	
+	switch(category)
+	{
+		case 0:
+			totalsize_ = apps_totalsize;
+			example = apps;
+			fp = fopen("apps.txt", "wb");
+		break;
+		case 1:
+			totalsize_ = emus_totalsize;
+			example = emus;
+			fp = fopen("emus.txt", "wb");
+		break;
+		case 2:
+			totalsize_ = games_totalsize;
+			example = games;
+			fp = fopen("games.txt", "wb");
+		break;
+	}
+	
+	for(e=0;e<totalsize_;e++)
+	{
+		fprintf(fp, "%s\n", example[e].name);
+		fprintf(fp, "%s\n", example[e].description);
+		fprintf(fp, "%s\n", example[e].executable_path);
+		fprintf(fp, "%s\n", example[e].yes_search);
+		for(i=0;i<example[e].howmuchext;i++)
+		{
+			fprintf(fp, "%s", example[e].ext[i]);
+			if (i+1 < example[e].howmuchext) fprintf(fp, ",");
+		}
+		fprintf(fp, "\n%s\n", example[e].commandline);
+		fprintf(fp, "%s\n", example[e].icon_path);
+		fprintf(fp, "%d\n", example[e].real_clock_speed);
+		fprintf(fp, "===\n");
+	}
+	fclose(fp);
+}
+
+
 void AppSettings_screen(uint8_t category, uint16_t list_numb)
 {
 	uint8_t done = 1;
 	int8_t tmp_buf[10];
+	uint16_t old_overclocking;
 	struct file_struct* structure_file;
 	
 	switch(category)
@@ -314,6 +365,7 @@ void AppSettings_screen(uint8_t category, uint16_t list_numb)
 		break;
 	}
 	
+	old_overclocking = structure_file[list_numb].real_clock_speed;
 	snprintf(tmp_buf, sizeof(tmp_buf), "%d Mhz", structure_file[list_numb].real_clock_speed);
 	
 	while (done == 1) 
@@ -349,6 +401,12 @@ void AppSettings_screen(uint8_t category, uint16_t list_numb)
 		
 		if (button_state[8] == 1) done = 0;
 		ScaleUp();
+	}
+	
+	/* Only write back overclocking settings if they changed */
+	if (old_overclocking != structure_file[list_numb].real_clock_speed)
+	{
+		Write_Settings(category);
 	}
 }
 
@@ -602,7 +660,7 @@ void MenuBrowser()
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	SDL_Quit();
 	
-	/* Hack, we need to use the executable's directory rather than that shit */
+	/* Hack, we need to use the executable's directory (argv[0]) rather than that shit */
 	chdir("/mnt/int_sd/apps/smenu");
 	Progress_RW(1);
 	
@@ -727,7 +785,7 @@ int32_t main(int32_t argc, int8_t* argv[])
 	currentdir = getcwd(cwdbuf, 512);
 	
 	Progress_RW(0);
-	
+
 	MenuBrowser();
 
 	return 0;
@@ -834,6 +892,7 @@ void controls()
 		
 	}
 
+	/* HACCCCKKKK */
     SDL_Event event;
 	while( SDL_PollEvent( &event ) )
 	{

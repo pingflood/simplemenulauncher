@@ -167,7 +167,7 @@ y
 .cue,.pbp,.zip,.mds,.bin,.mdf,.iso,.cbn,.img
 -iso
 icons/pcsx4all.png
-630
+600
 ===
 Picodrive
 Megadrive emulator

@@ -32,7 +32,8 @@
 #include "dirname.h"
 
 SDL_Surface *screen, *backbuffer;
-SDL_Surface *img, *font_bmp, *font_bmp_small, *menu_icons, *power_bmp, *usb_bmp[2], *selector_bmp;
+SDL_Surface *img, *font_bmp, *font_bmp_small, *menu_icons, *power_bmp, *usb_bmp[2], *selector_bmp, *battery_icon;
+SDL_Surface *help_gfx, *help_icon, *chip_bmp;
 TTF_Font *gFont;
 
 uint8_t button_time[15], button_state[15];
@@ -220,7 +221,7 @@ uint8_t prompt(uint8_t* text, uint8_t* yes_text, uint8_t* no_text)
 	while (done == 0) 
 	{
 		controls();
-		SDL_BlitSurface(img, NULL, backbuffer, NULL);
+		Display_Background();
 		Draw_Rect(backbuffer, 56, 24, 224, 96, COLOR_SELECT);
 		Print_text(font_bmp, 72,32, text, COLOR_INACTIVE_ITEM, 16);
 		Print_text(font_bmp, 64,64, yes_text, COLOR_INACTIVE_ITEM, 16);
@@ -244,7 +245,7 @@ uint8_t prompt_img(SDL_Surface* img_todraw)
 	while (done == 0) 
 	{
 		controls();
-		SDL_BlitSurface(img, NULL, backbuffer, NULL);
+		Display_Background();
 		SDL_BlitSurface(img_todraw, NULL, backbuffer, NULL);
 		/* If A button is pressed */
 		if (button_state[4] == 1) done = 3;
@@ -273,7 +274,7 @@ void USB_Mount_Loop()
 		while (done == 1) 
 		{
 			controls();
-			SDL_BlitSurface(img, NULL, backbuffer, NULL);
+			Display_Background();
 			SDL_BlitSurface(usb_bmp[1], NULL, backbuffer, NULL);
 			if (button_state[5] == 1 || button_state[6] == 1 || button_state[8] == 1  || getUDCStatus() != UDC_CONNECT) done = 0;
 			ScaleUp();
@@ -285,12 +286,83 @@ void USB_Mount_Loop()
 		while (done == 1) 
 		{
 			controls();
-			SDL_BlitSurface(img, NULL, backbuffer, NULL);
+			Display_Background();
 			Draw_Rect(backbuffer, 56, 24, 224, 96, COLOR_SELECT);
 			Print_text(font_bmp, 80,64, "USB MOUNTED", COLOR_INACTIVE_ITEM, 16);
 			if (button_state[5] == 1 || button_state[6] == 1 || button_state[8] == 1  || getUDCStatus() != UDC_CONNECT) done = 0;
 			ScaleUp();
 		}
+	}
+}
+
+void AppSettings_screen(uint8_t category, uint16_t list_numb)
+{
+	uint8_t done = 1;
+	int8_t tmp_buf[10];
+	struct file_struct* structure_file;
+	
+	switch(category)
+	{
+		case 0:
+		structure_file = apps;
+		break;
+		case 1:
+		structure_file = emus;
+		break;
+		case 2:
+		structure_file = games;
+		break;
+	}
+	
+	snprintf(tmp_buf, sizeof(tmp_buf), "%d Mhz", structure_file[list_numb].real_clock_speed);
+	
+	while (done == 1) 
+	{
+		controls();
+		Display_Background();
+		Put_image(structure_file[list_numb].icon, 8, 8);
+		Print_text(font_bmp, 48, 12, structure_file[list_numb].name, COLOR_INACTIVE_ITEM, 16);
+		
+		Draw_Rect(backbuffer, 0, 48, 320, 39, 500);
+		
+		Put_image(chip_bmp, 8, 50);
+		Print_text(font_bmp, 48, 56, "Clock Speed: ", COLOR_INACTIVE_ITEM, 16);
+		Print_text(font_bmp, 208, 56, tmp_buf, COLOR_INACTIVE_ITEM, 16);
+
+		if (button_state[3] == 1)
+		{
+			if (structure_file[list_numb].real_clock_speed < 642)
+			{
+				structure_file[list_numb].real_clock_speed += 6;
+			}
+			snprintf(tmp_buf, sizeof(tmp_buf), "%d Mhz", structure_file[list_numb].real_clock_speed);
+		}
+		
+		if (button_state[2] == 1)
+		{
+			if (structure_file[list_numb].real_clock_speed > 528)
+			{
+				structure_file[list_numb].real_clock_speed -= 6;
+			}
+			snprintf(tmp_buf, sizeof(tmp_buf), "%d Mhz", structure_file[list_numb].real_clock_speed);
+		}
+		
+		if (button_state[8] == 1) done = 0;
+		ScaleUp();
+	}
+}
+
+void Help_Screen()
+{
+	uint8_t done = 1;
+	/* Show USB graphics if loaded */
+	while (done == 1) 
+	{
+		controls();
+		Display_Background();
+		SDL_BlitSurface(help_gfx, NULL, backbuffer, NULL);
+		if (button_state[4] == 1 || button_state[8] == 1) done = 0;
+		ScaleUp();
 	}
 }
 
@@ -396,16 +468,26 @@ void MenuBrowser()
 				}
 			}
 					
-			SDL_BlitSurface(img, NULL, backbuffer, NULL);
+			Display_Background();
 			Draw_Rect(backbuffer, 0, select_menu*38, 320, 39, 500);
 			Display_Files(&list_menu, structure_file);
 			
-			if (selector_bmp) Put_image(selector_bmp, 224 + (select_cat * 32), 201);
+			if (selector_bmp) Put_image(selector_bmp, 224 + (select_cat * 32), 199);
 			else Draw_Rect(backbuffer, 224 + (select_cat * 32), 208, 32, 32, 1024);
 			Put_image(menu_icons, 224, 208);
 			
+			Put_image(help_icon, 301, 24);
+			Put_sprite(battery_icon, 304, 0, 16, 16, 0);
+			Battery_Status();
+			
 			if (button_state[5] == 1)
 				USB_Mount();
+				
+			if (button_state[13] == 1)
+				Help_Screen();
+				
+			if (button_state[14] == 1)
+				AppSettings_screen(select_cat, list_menu+select_menu);
 			
 			/* L shoulder */
 			if (button_state[9] == 1)
@@ -512,12 +594,19 @@ void MenuBrowser()
 	if (power_bmp != NULL) SDL_FreeSurface(power_bmp);
 	if (menu_icons != NULL) SDL_FreeSurface(menu_icons);
 	if (selector_bmp != NULL) SDL_FreeSurface(selector_bmp);
+	if (battery_icon != NULL) SDL_FreeSurface(battery_icon);
+	if (help_gfx != NULL) SDL_FreeSurface(help_gfx);
+	if (help_icon != NULL) SDL_FreeSurface(help_icon);
+	if (chip_bmp != NULL) SDL_FreeSurface(chip_bmp);
+	
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	SDL_Quit();
 	
 	/* Hack, we need to use the executable's directory rather than that shit */
 	chdir("/mnt/int_sd/apps/smenu");
 	Progress_RW(1);
+	
+	HW_Deinit();
 
 	if (err == 1 || err == 4)
 		chdir(DirName(structure_file[select_menu+list_menu].executable_path));
@@ -600,7 +689,6 @@ int32_t main(int32_t argc, int8_t* argv[])
 	 * Thus, we need to render to a buffer and scale it before renderin to the screen.
 	 * */
 	#ifdef RS97
-	SetCPU(528);
 	screen = SDL_SetVideoMode(320, 480, 16, SDL_HWSURFACE); 
 	#else
 	screen = SDL_SetVideoMode(640, 480, 16, SDL_HWSURFACE); 
@@ -621,6 +709,11 @@ int32_t main(int32_t argc, int8_t* argv[])
 	usb_bmp[0] = Load_Image("gfx/usb_mount.png");
 	usb_bmp[1] = Load_Image("gfx/usb_mount2.png");
 	selector_bmp = Load_Image("gfx/selector.png");
+	battery_icon = Load_Image("gfx/battery.png");
+	
+	help_icon = Load_Image("gfx/help_button.png");
+	help_gfx = Load_Image("gfx/help.png");
+	chip_bmp = Load_Image("gfx/chip.png");
 	
 	HW_Init();
 	Increase_Backlight();
@@ -726,13 +819,8 @@ void controls()
 			break;
 			
 			case 1:
-				button_time[i] = button_time[i] + 1;
-				
-				if (button_time[i] > 0)
-				{
-					button_state[i] = 2;
-					button_time[i] = 0;
-				}
+				button_state[i] = 2;
+				button_time[i] = 0;
 			break;
 			
 			case 2:
@@ -742,20 +830,26 @@ void controls()
 					button_time[i] = 0;
 				}
 			break;
-			
-			/*case 3:
-				button_time[i] = button_time[i] + 1;
-				
-				if (button_time[i] > 1)
-				{
-					button_state[i] = 0;
-					button_time[i] = 0;
-				}
-			break;*/
 		}
 		
 	}
 
     SDL_Event event;
-    SDL_PollEvent(&event);
+	while( SDL_PollEvent( &event ) )
+	{
+		switch( event.type )
+		{
+			case SDL_KEYDOWN:
+			switch( event.key.keysym.sym )
+			{
+				case SDLK_UP:
+					if (button_state[0] == 0) button_state[0] = 1;
+				break;
+				case SDLK_DOWN:
+					if (button_state[0] == 1) button_state[1] = 1;
+				break;
+			}
+			break;
+		}
+	}
 }

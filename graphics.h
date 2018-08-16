@@ -11,5 +11,6 @@ extern void Draw_Rect(SDL_Surface* screen, int16_t x, int16_t y, uint16_t width,
 extern void Print_smalltext(SDL_Surface *tmp, int32_t x, int32_t y, uint8_t *text_ex, uint16_t color, uint16_t size);
 extern void Limit_FPS();
 extern void ScaleUp();
+extern void Display_Background();
 
 #endif

@@ -22,16 +22,20 @@
 #include <sys/mman.h>
 #include <dirent.h>
 #endif
-
+#include "graphics.h"
 #include "rs97.h"
 
-extern SDL_Surface *screen, *backbuffer, *img, *power_bmp, *usb_bmp[2];
+extern SDL_Surface *screen, *backbuffer, *img, *power_bmp, *usb_bmp[2], *battery_icon;
 
 /* RS-97 specific things */
 uint8_t tvout_enabled = 0, sdcard_mount = 0;
 int32_t memdev = 0;
 uint32_t backlight_v = 75;
 volatile uint32_t *memregs;
+
+/* Setting it at this value will check the battery right away upon boot up */
+static uint16_t check_battery = 1280;
+int8_t battery_level = 0;
 
 int16_t curMMCStatus, preMMCStatus;
 int16_t getMMCStatus(void) {
@@ -61,6 +65,43 @@ void SetCPU(uint32_t mhz)
 #endif
 }
 
+static int32_t getBatteryStatus() 
+{
+	char buf[32] = "-1";
+#ifdef RS97
+	FILE *f = fopen("/proc/jz/battery", "r");
+	if (f) {
+		fgets(buf, sizeof(buf), f);
+	}
+	fclose(f);
+#endif
+	return atol(buf);
+}
+
+static uint16_t getBatteryLevel() 
+{
+	int32_t val;
+#ifdef RS97
+	val = getBatteryStatus();
+	if (val > 4500) val = 4500;
+	else if (val < 0) val = 0;
+	return 5 - 5 * (4500 - val) / (4500 - 0);
+#else
+	return 0;
+#endif
+}
+
+void Battery_Status()
+{
+	check_battery++;
+	if (check_battery > 1280)
+	{
+		check_battery = 0;
+		battery_level = getBatteryLevel();
+	}
+	Put_sprite(battery_icon, 304, 0, 16, 16, 0);
+}
+
 void HW_Init()
 {
 #ifdef RS97
@@ -83,14 +124,13 @@ void HW_Init()
 	
 	/* Set CPU clock to its default */
 	SetCPU(528);
-	
 #endif
 }
 
 void HW_Deinit()
 {
+	if (memdev) close(memdev);
 }
-
 
 void Increase_Backlight()
 {
@@ -98,9 +138,7 @@ void Increase_Backlight()
 	backlight_v = backlight_v + 25;
 	/* 0 means that the screen is shut off, lowest backlight is 1 */
 	if (backlight_v > 100) backlight_v = 1;
-	
 	sprintf(buf, "echo %d > /proc/jz/lcd_backlight", backlight_v);
-	
 	system(buf);
 }
 
@@ -138,7 +176,7 @@ void SD_Mount()
 	}
 }
 
-/* Right now, it is only executed at boot (because that's where it is the most reliable.
+/* Right now, it is only executed at boot (because that's where it is the most reliable)
  * It might still launch again though... perhaps use an environment variable to prevent this ?
  *  */
 void USB_Mount()
@@ -266,8 +304,7 @@ void Suspend_Mode()
 {
 	SDL_Event event;
 	uint8_t done = 1;
-	uint8_t *keystate;
-	
+
 	#ifdef RS97
 	char buf[34] = {0};
 	system("echo 0 > /proc/jz/lcd_backlight");
@@ -276,15 +313,27 @@ void Suspend_Mode()
 	
 	while(done == 1)
 	{
-		keystate = SDL_GetKeyState(NULL);
-		if (keystate[SDLK_END] || keystate[SDLK_3]) done = 0;
-		SDL_PollEvent(&event);
-		SDL_Delay(384);
+		while( SDL_PollEvent( &event ) )
+		{
+			switch( event.type )
+			{
+				case SDL_KEYDOWN:
+				switch( event.key.keysym.sym )
+				{
+					case SDLK_END:
+					case SDLK_3:
+						done = 0;
+					break;
+				}
+				break;
+			}
+		}
+		SDL_Delay(256);
 	}
 	
 	/* Set brightness and CPU speed back */ 
 	#ifdef RS97
-	SetCPU(528);
+	SetCPU(600);
 	sprintf(buf, "echo %d > /proc/jz/lcd_backlight", backlight_v);
 	system(buf);
 	#endif

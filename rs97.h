@@ -21,12 +21,14 @@ extern uint8_t tvout_enabled, sdcard_mount;
 extern uint8_t button_time[], button_state[];
 
 extern void HW_Init();
+extern void HW_Deinit();
 extern void SD_Mount();
 extern void USB_Mount();
 extern void TV_Out();
 extern void USB_Mount_Loop();
 extern int16_t getUDCStatus();
 extern uint8_t Shutdown();
+extern void Battery_Status();
 
 extern void Increase_Backlight();
 extern void SetCPU(uint32_t mhz);

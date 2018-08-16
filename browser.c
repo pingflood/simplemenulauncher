@@ -293,13 +293,6 @@ static void Controls_filebrowser()
 			time_b[i]++;
 			if (time_b[i] > 3)
 				state_b[i] = 1;
-			/*if (time_b[i] > 3)
-				state_b[i] = 1;
-			if (time_b[i] > 4)
-			{
-				state_b[i] = 0;
-				time_b[i] = 0;
-			}*/
 		}
 		else
 		{

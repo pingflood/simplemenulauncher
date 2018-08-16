@@ -5,13 +5,7 @@
 #include <SDL/SDL_image.h>
 #include "font.h"
 
-extern SDL_Surface *backbuffer, *screen;
-
-void ScaleUp()
-{
-	SDL_SoftStretch(backbuffer, NULL, screen, NULL);
-	SDL_Flip(screen);
-}
+extern SDL_Surface *backbuffer, *screen, *img;
 
 SDL_Surface* Load_Image(const int8_t* directory)
 {
@@ -62,7 +56,6 @@ void Print_smalltext(SDL_Surface *tmp, int32_t x, int32_t y, uint8_t *text_ex, u
 	}
 }
 
-
 void Draw_Rect(SDL_Surface* screen, int16_t x, int16_t y, uint16_t width, uint16_t height, uint16_t color)
 {
 	SDL_LockSurface(screen);
@@ -79,6 +72,26 @@ void Draw_Rect(SDL_Surface* screen, int16_t x, int16_t y, uint16_t width, uint16
 	SDL_FillRect(screen, &scr_draw, color_draw);
 	
 	SDL_UnlockSurface(screen);
+}
+
+void ScaleUp()
+{
+	#ifdef RS97
+	/* We'll use memmove rather than SoftStretch for speed reasons */
+	uint32_t *s = (uint32_t*) backbuffer->pixels;
+	uint32_t *d = (uint32_t*) screen->pixels;
+	for(uint8_t y = 0; y < 240; y++, s += 160, d += 320) 
+		memmove(d, s, 1280);
+	#else
+	SDL_SoftStretch(backbuffer, NULL, screen, NULL);
+	#endif
+	SDL_Flip(screen);
+}
+
+void Display_Background()
+{
+	if (img) SDL_BlitSurface(img, NULL, backbuffer, NULL);
+	else Draw_Rect(backbuffer, 0, 0, 320, 240, 0);
 }
 
 /* Framerate limiter, This is the only SDL_Delay that we'll need */

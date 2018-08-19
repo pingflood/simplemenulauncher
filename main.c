@@ -33,7 +33,7 @@
 
 SDL_Surface *screen, *backbuffer;
 SDL_Surface *img, *font_bmp, *font_bmp_small, *menu_icons, *power_bmp, *usb_bmp[2], *selector_bmp, *battery_icon;
-SDL_Surface *help_gfx, *help_icon, *chip_bmp, *bar_bmp;
+SDL_Surface *help_gfx, *chip_bmp, *bar_bmp;
 TTF_Font *gFont;
 
 uint8_t button_time[15], button_state[15];
@@ -50,9 +50,9 @@ int32_t select_menu = 2, list_menu = -2;
 uint8_t additional_file[MAX_NAME_SIZE];
 
 int8_t* currentdir;
-struct file_struct apps[MAX_ELEMENTS], games[MAX_ELEMENTS], emus[MAX_ELEMENTS];
+struct file_struct apps[MAX_ELEMENTS], games[MAX_ELEMENTS], emus[MAX_ELEMENTS], fav[MAX_ELEMENTS];
 /* They are not inside the structure to avoid duplication and memory waste */
-uint16_t emus_totalsize, games_totalsize, apps_totalsize;
+uint16_t emus_totalsize, games_totalsize, apps_totalsize, fav_totalsize;
 
 /* Select category, global because we need it for saves */
 static uint8_t select_cat = 0;
@@ -93,10 +93,10 @@ void Fill_Element(int sz, struct file_struct* example, uint16_t* totalsize)
 			break;
 		}
 		
-		sprintf(example[e].name, "%s", loop(example[e].name, &lastpos));
-		sprintf(example[e].description, "%s", loop(example[e].description, &lastpos));
-		sprintf(example[e].executable_path, "%s", loop(example[e].executable_path, &lastpos));
-		sprintf(example[e].yes_search, "%s", loop(example[e].yes_search, &lastpos));
+		loop(example[e].name, &lastpos);
+		loop(example[e].description, &lastpos);
+		loop(example[e].executable_path, &lastpos);
+		loop(example[e].yes_search, &lastpos);
 		
 		for(i=0;i<64;i++)
 		{
@@ -119,8 +119,8 @@ void Fill_Element(int sz, struct file_struct* example, uint16_t* totalsize)
 			}
 		}
 
-		sprintf(example[e].commandline, "%s", loop(example[e].commandline, &lastpos));
-		sprintf(example[e].icon_path, "%s", loop(example[e].icon_path, &lastpos));
+		loop(example[e].commandline, &lastpos);
+		loop(example[e].icon_path, &lastpos);
 		
 		example[e].icon = Load_Image(example[e].icon_path);
 		
@@ -193,7 +193,11 @@ uint16_t Load_Files(uint8_t caca)
 	}
 	
 	/* If the file could not be loaded then just report that there are no apps */
-	if (!fp) totalsize = 0;
+	if (!fp)
+	{
+
+		totalsize = 0;
+	}
 	
 	return totalsize;
 }
@@ -530,13 +534,12 @@ void MenuBrowser()
 			Draw_Rect(backbuffer, 0, select_menu*38, 320, 39, 500);
 			Display_Files(&list_menu, structure_file);
 			
-			Put_image(bar_bmp, 0, 224);
+			Put_image(bar_bmp, 0, 240-20);
 			
 			if (selector_bmp) Put_image(selector_bmp, 112 + (select_cat * 32), 199);
 			else Draw_Rect(backbuffer, 224 + (select_cat * 32), 208, 32, 32, 1024);
 			
 			Put_image(menu_icons, 112, 208);
-			Put_image(help_icon, 266, 214);
 			
 			Battery_Status();
 			
@@ -657,7 +660,6 @@ void MenuBrowser()
 	if (selector_bmp != NULL) SDL_FreeSurface(selector_bmp);
 	if (battery_icon != NULL) SDL_FreeSurface(battery_icon);
 	if (help_gfx != NULL) SDL_FreeSurface(help_gfx);
-	if (help_icon != NULL) SDL_FreeSurface(help_icon);
 	if (chip_bmp != NULL) SDL_FreeSurface(chip_bmp);
 	if (bar_bmp != NULL) SDL_FreeSurface(bar_bmp);
 	
@@ -773,7 +775,6 @@ int32_t main(int32_t argc, int8_t* argv[])
 	selector_bmp = Load_Image("gfx/selector.png");
 	battery_icon = Load_Image("gfx/battery.png");
 	
-	help_icon = Load_Image("gfx/help_bar.png");
 	help_gfx = Load_Image("gfx/help.png");
 	chip_bmp = Load_Image("gfx/chip.png");
 	bar_bmp = Load_Image("gfx/grey_bar.png");

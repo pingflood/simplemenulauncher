@@ -13,7 +13,7 @@
  * WHY DIRNAME DOESN'T WORK PROPERLY ON MUSL ????
  * HOW CAN YOU FUCK UP SOMETHING SO TRIVIAL ?
  * I'm forced to use this crap because the libc doesn't work on our platform.
- * (Or maybe our old kernel is to be blamed ?? I don't know and i don't have a UART to debug.
+ * (Or maybe our old kernel is to be blamed ?? I don't know and i don't have a UART to debug)
  * 
  * Btw, if your platform is not degenerate, then just use dirname (in lowercase).
  * It's possible that it doesn't like the way i parse my array.

@@ -8,9 +8,9 @@ OUTPUTNAME = smenu.elf
 
 DEFINES = 
 INCLUDES = -I.
-OPT_FLAGS  = -Ofast -fdata-sections -ffunction-sections -fno-pic -fno-pie -msym32 -mhard-float -mips32 -mno-mips16
+OPT_FLAGS  = -O2 -fdata-sections -ffunction-sections -mhard-float -mips32 -mno-mips16
 
-CFLAGS = $(DEFINES) $(INCLUDES) $(OPT_FLAGS) -std=gnu11 -DRS97
+CFLAGS = $(DEFINES) $(INCLUDES) $(OPT_FLAGS) -DRS97
 LDFLAGS = -lSDL -lSDL_image -lSDL_ttf -Wl,--as-needed -Wl,--gc-sections -flto -s
 
 # Redream (main engine)

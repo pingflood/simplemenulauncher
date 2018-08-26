@@ -3,6 +3,7 @@ File Explorer
 /mnt/int_sd/apps/commander/run.dge
 n
 .mp4
+/mnt
 #
 icons/commander.png
 528
@@ -11,7 +12,8 @@ FFPlay
 Video Player
 /mnt/int_sd/apps/ffplay/ffplay
 y
-.mp4,.roq,.avi,.mp3,.ogg,.flac,.mpg,.mkv,.webm,.wav,.cpk
+.mp4,.roq,.avi,.mp3,.ogg,.flac,.mpg,.mkv,.webm,.wav,.cpk,.MP4,.ROQ,.AVI,.MP3,.OGG,.FLAC,.MPG,.MKV,.WEBM,.WAV,.CPK
+/mnt
 #
 icons/ffplay.png
 600
@@ -21,6 +23,7 @@ Text Editor
 /mnt/int_sd/apps/glutexto/run.dge
 n
 .mp4
+/mnt
 #
 icons/glutexto.png
 528
@@ -30,6 +33,7 @@ Track editor
 /mnt/int_sd/apps/lgbt/run.dge
 n
 .mp4
+/mnt
 #
 icons/lgbt.png
 528
@@ -39,7 +43,18 @@ Image viewer
 /mnt/int_sd/apps/o2xiv/run.dge
 n
 .mp4
+/mnt
 #
 icons/o2xiv.png
+600
+===
+Explorer
+Launch a file
+exec
+y
+#
+/mnt
+#
+icons/explorer.png
 600
 ===

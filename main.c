@@ -50,30 +50,33 @@ int32_t select_menu = 2, list_menu = -2;
 uint8_t additional_file[MAX_NAME_SIZE];
 
 int8_t* currentdir;
-struct file_struct apps[MAX_ELEMENTS], games[MAX_ELEMENTS], emus[MAX_ELEMENTS], fav[MAX_ELEMENTS];
+struct file_struct apps[MAX_ELEMENTS], games[MAX_ELEMENTS], emus[MAX_ELEMENTS], fav[MAX_ELEMENTS], walla[1];
 /* They are not inside the structure to avoid duplication and memory waste */
 uint16_t emus_totalsize, games_totalsize, apps_totalsize, fav_totalsize;
 
 /* Select category, global because we need it for saves */
 static uint8_t select_cat = 0;
 
-uint8_t* loop(uint8_t* name, uint32_t* position_file_byte)
+struct settings mysettings;
+const uint8_t default_wallpaperpath[] = "gfx/background.bmp";
+
+uint32_t loop(uint8_t* name, uint32_t position_file_byte)
 {
 	uint32_t i, a;
 	uint8_t tmp[OUR_PATH_MAX];
 	
-	for(a=*position_file_byte;a<*position_file_byte+MAX_NAME_SIZE;a++)
+	for(a=position_file_byte;a<position_file_byte+MAX_NAME_SIZE;a++)
 	{
 		snprintf(tmp, MAX_NAME_SIZE, "%s", name);
 		snprintf(name, MAX_NAME_SIZE, "%s%c", tmp, buf[a]);
 		if (buf[a+1] == '\n')
 		{
-			*position_file_byte = a + 2;
+			position_file_byte = a + 2;
 			break;
 		}
 	}
 
-	return name;
+	return position_file_byte;
 }
 
 /* Using a local struct was prone to bugs for some reasons (?) so we'll pass everything through a pointer. */
@@ -85,6 +88,10 @@ void Fill_Element(int sz, struct file_struct* example, uint16_t* totalsize)
 	uint8_t tmp[OUR_PATH_MAX];
 	uint32_t totalsz;
 	
+	/* We scroll through the text file and fill the array with names, description and all...
+	 * Loop function stops reading when it meets the endline '\n'.
+	 * The current position is parsed to lastpos, which is a pointer
+	 * */
 	for(e=0;e<MAX_ELEMENTS;e++)
 	{
 		if (lastpos >= sz) 
@@ -93,10 +100,10 @@ void Fill_Element(int sz, struct file_struct* example, uint16_t* totalsize)
 			break;
 		}
 		
-		loop(example[e].name, &lastpos);
-		loop(example[e].description, &lastpos);
-		loop(example[e].executable_path, &lastpos);
-		loop(example[e].yes_search, &lastpos);
+		lastpos = loop(example[e].name, lastpos);
+		lastpos = loop(example[e].description, lastpos);
+		lastpos = loop(example[e].executable_path, lastpos);
+		lastpos = loop(example[e].yes_search, lastpos);
 		
 		for(i=0;i<64;i++)
 		{
@@ -119,14 +126,14 @@ void Fill_Element(int sz, struct file_struct* example, uint16_t* totalsize)
 			}
 		}
 
-		loop(example[e].commandline, &lastpos);
-		loop(example[e].icon_path, &lastpos);
+		lastpos = loop(example[e].mnt_path, lastpos);
+		lastpos = loop(example[e].commandline, lastpos);
+		lastpos = loop(example[e].icon_path, lastpos);
 		
 		example[e].icon = Load_Image(example[e].icon_path);
 		
-		// Atoi alternative
-		//example[e].real_clock_speed = atoi(loop(example[e].clock_speed, &lastpos));
-		example[e].real_clock_speed = strtol (loop(example[e].clock_speed, &lastpos),NULL,10);
+		lastpos = loop(example[e].clock_speed, lastpos);
+		example[e].real_clock_speed = strtol (example[e].clock_speed, NULL, 10);
 		lastpos += 4;
 	}
 }
@@ -340,12 +347,49 @@ void Write_Settings(uint8_t category)
 			fprintf(fp, "%s", example[e].ext[i]);
 			if (i+1 < example[e].howmuchext) fprintf(fp, ",");
 		}
+		fprintf(fp, "\n%s\n", example[e].mnt_path);
 		fprintf(fp, "\n%s\n", example[e].commandline);
 		fprintf(fp, "%s\n", example[e].icon_path);
 		fprintf(fp, "%d\n", example[e].real_clock_speed);
 		fprintf(fp, "===\n");
 	}
 	fclose(fp);
+}
+
+void Write_AppSettings()
+{
+	FILE* fp;
+	fp = fopen("wallpaper.txt", "w");
+	if (fp)
+	{
+		fprintf(fp, " %s", mysettings.wallpaper_path);
+		fclose(fp);
+	}
+}
+
+void Read_AppSettings()
+{
+	FILE* fp;
+	SDL_Surface* tmp;
+	fp = fopen("wallpaper.txt", "r");
+
+	if (fp)
+	{
+		/* FIXME : Surely there's a better way ? */
+		fscanf (fp, "%s", mysettings.wallpaper_path);
+		fclose(fp);
+		
+		tmp = Load_Image(mysettings.wallpaper_path);
+		if (!tmp)
+			snprintf(mysettings.wallpaper_path, sizeof(mysettings.wallpaper_path), "%s", default_wallpaperpath);
+		else
+			SDL_FreeSurface(tmp);
+	}
+	else
+	{
+		snprintf(mysettings.wallpaper_path, sizeof(mysettings.wallpaper_path), "%s", default_wallpaperpath);
+	}
+	Write_AppSettings();
 }
 
 
@@ -414,6 +458,7 @@ void AppSettings_screen(uint8_t category, uint16_t list_numb)
 	}
 }
 
+
 void Help_Screen()
 {
 	uint8_t done = 1;
@@ -452,6 +497,85 @@ void Backlight_control()
 {
 	if (button_state[11] == 1)
 		Increase_Backlight();
+}
+
+int32_t GlobalSettings_screen()
+{
+	int32_t err = 0;
+	uint8_t done = 1;
+
+	while (done == 1) 
+	{
+		controls();
+		Display_Background();
+		
+		Put_image(bar_bmp, 0, 240-20);
+			
+		if (selector_bmp) Put_image(selector_bmp, 96 + (3 * 32), 199);
+		else Draw_Rect(backbuffer, 96 + (3 * 32), 208, 32, 32, 1024);
+			
+		Put_image(menu_icons, 96, 208);
+		
+		Print_text(font_bmp, 48, 12, "Settings", COLOR_INACTIVE_ITEM, 16);
+		
+		Draw_Rect(backbuffer, 0, 48, 320, 39, 500);
+		
+		Put_image(chip_bmp, 8, 50);
+		Print_text(font_bmp, 48, 56, "Wallpaper", COLOR_INACTIVE_ITEM, 16);
+		//Print_smalltext(font_bmp_small, 160, 56, "/mnt/stuff", COLOR_INACTIVE_ITEM, 8);
+		Print_smalltext(font_bmp_small, 48, 76, mysettings.wallpaper_path, COLOR_INACTIVE_ITEM, 8);
+		
+		Battery_Status();
+		
+		if (button_state[12] == 1) 
+		{
+			err = Shutdown();
+			if (err == 2 || err == 3) done = 0;
+		}
+		
+		if (button_state[4] == 1)
+		{
+			#ifdef RS97
+			snprintf(currentdir, 512, "/mnt/");
+			chdir(currentdir);
+			#endif
+			/* Refresh again */
+			list_menu = 0;
+			select_menu = 0;
+			list_all_files(currentdir,walla);
+			int32_t err = File_Browser_file(walla);	
+			snprintf(mysettings.wallpaper_path, sizeof(mysettings.wallpaper_path), "%s", additional_file);
+			Write_AppSettings();
+			
+			if (img) SDL_FreeSurface(img);
+			img = Load_Image(mysettings.wallpaper_path);
+		}
+			
+		if (button_state[5] == 1)
+			USB_Mount();
+				
+		if (button_state[13] == 1)
+			Help_Screen();
+		
+		if (button_state[9] == 1)
+		{
+			select_cat = 2;
+			list_menu = -2;
+			select_menu = 2;
+			done = 0;	
+		}
+		else if (button_state[10] == 1) 
+		{
+			select_cat = 0;
+			list_menu = -2;
+			select_menu = 2;
+			done = 0;	
+		}
+
+		ScaleUp();
+	}
+	
+	return err;
 }
 
 /* 
@@ -536,10 +660,10 @@ void MenuBrowser()
 			
 			Put_image(bar_bmp, 0, 240-20);
 			
-			if (selector_bmp) Put_image(selector_bmp, 112 + (select_cat * 32), 199);
-			else Draw_Rect(backbuffer, 224 + (select_cat * 32), 208, 32, 32, 1024);
+			if (selector_bmp) Put_image(selector_bmp, 96 + (select_cat * 32), 199);
+			else Draw_Rect(backbuffer, 96 + (select_cat * 32), 208, 32, 32, 1024);
 			
-			Put_image(menu_icons, 112, 208);
+			Put_image(menu_icons, 96, 208);
 			
 			Battery_Status();
 			
@@ -555,18 +679,36 @@ void MenuBrowser()
 			/* L shoulder */
 			if (button_state[9] == 1)
 			{
-				if (select_cat > 0) select_cat--;
-				list_menu = -2;
-				select_menu = 2;
-				structure_file = SetMenu(select_cat, &struct_totalsize);
+				if (select_cat > 0)
+				{
+					select_cat--;
+					list_menu = -2;
+					select_menu = 2;
+					structure_file = SetMenu(select_cat, &struct_totalsize);
+				}
+				else if (select_cat == 0)
+				{
+					err = GlobalSettings_screen();
+					structure_file = SetMenu(select_cat, &struct_totalsize);
+					if (err == 2 || err == 3) done = 1;
+				}
 			}
 			/* R shoulder */
 			else if (button_state[10] == 1)
 			{
-				if (select_cat < 2) select_cat++;
-				list_menu = -2;
-				select_menu = 2;
-				structure_file = SetMenu(select_cat, &struct_totalsize);
+				if (select_cat < 2)
+				{
+					select_cat++;
+					list_menu = -2;
+					select_menu = 2;
+					structure_file = SetMenu(select_cat, &struct_totalsize);
+				}
+				else if (select_cat == 2)
+				{
+					err = GlobalSettings_screen();
+					structure_file = SetMenu(select_cat, &struct_totalsize);
+					if (err == 2 || err == 3) done = 1;
+				}
 			}
 			
 
@@ -749,6 +891,17 @@ int32_t main(int32_t argc, int8_t* argv[])
 		SDL_Init(SDL_INIT_VIDEO);
 	}
 	
+	/* Set default extensions for Wallpaper */
+	walla[0].howmuchext = 8;
+	snprintf(walla[0].ext[0], MAX_NAME_SIZE, ".png");
+	snprintf(walla[0].ext[1], MAX_NAME_SIZE, ".bmp");
+	snprintf(walla[0].ext[2], MAX_NAME_SIZE, ".jpeg");
+	snprintf(walla[0].ext[3], MAX_NAME_SIZE, ".jpg");
+	snprintf(walla[0].ext[4], MAX_NAME_SIZE, ".PNG");
+	snprintf(walla[0].ext[5], MAX_NAME_SIZE, ".BMP");
+	snprintf(walla[0].ext[6], MAX_NAME_SIZE, ".JPEG");
+	snprintf(walla[0].ext[7], MAX_NAME_SIZE, ".JPG");
+	
 	/* The RS-97 has a crappy screen of 320x480, but with an aspect ratio of 4:3.
 	 * Thus, we need to render to a buffer and scale it before renderin to the screen.
 	 * */
@@ -760,11 +913,13 @@ int32_t main(int32_t argc, int8_t* argv[])
 	backbuffer = SDL_CreateRGBSurface(SDL_HWSURFACE, 320, 240, 16, 0, 0, 0, 0);
 	SDL_ShowCursor(SDL_DISABLE);
 	
+	Read_AppSettings();
+	
 	TTF_Init();
 	gFont = TTF_OpenFont("gfx/font.ttf", 12 );
 	TTF_SetFontStyle(gFont, TTF_STYLE_NORMAL);
 	
-	img = Load_Image("gfx/background.bmp");
+	img = Load_Image(mysettings.wallpaper_path);
 	menu_icons = Load_Image("gfx/menu_icons.png");
 	font_bmp = Load_Image("gfx/font.png");
 	font_bmp_small = Load_Image("gfx/font_small.png");

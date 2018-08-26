@@ -49,6 +49,8 @@ static uint16_t scroll_choice = 0;
 static uint8_t filemode_search = 0;
 static int16_t numb_files = 0;
 
+uint8_t noextension = 0;
+
 /*
  * Why not use my own text drawing routines like i do in the Menu browser
  * but not in the file browser ? Well, SDL_ttf supports Unicode and the font provided
@@ -110,9 +112,7 @@ void list_all_files(int8_t* directory, struct file_struct* example)
 	{
 		while ( (ent = readdir (dir)) != NULL ) 
 		{
-			
 			/* Add the .. string and then after, reject them all */
-			
 			if (i == 0)
 			{
 				strncpy(file_name[i], "..", 512);
@@ -131,19 +131,37 @@ void list_all_files(int8_t* directory, struct file_struct* example)
 			isit_a_directory = is_folder(ent->d_name);	
 			present[0] = (pch[1] == NULL && pch[2] == NULL && pc != 0) ? 1 : 0;
 			
+			noextension = 0;
+			
 			if (present[0] == 1)
 			{
-				present[1] = 0;
 				/* We need to make sure to also hide the "." directories in order to avoid further clutter. */
 				if (!(ent->d_name[0] == '.' && ent->d_name[1] != '.'))
 				{
-					/* Let's look for the extension in our file */
-					for(e=0;e<example[list_menu+select_menu].howmuchext;e++)
+					/* noextension will be used in some cases, for example the executable browser or files without file extensions
+					 * Only apply this rule for files obviously, not folders.
+					 *  */
+					if (example[list_menu+select_menu].ext[0][0] == '#' && (isit_a_directory == 0))
 					{
-						if (strstr (ent->d_name, example[list_menu+select_menu].ext[e]) != NULL) 
+						noextension = 1;
+						present[1] = 1;
+					}
+					else
+					{
+						noextension = 0;
+						present[1] = 0;
+					}
+
+					if (noextension == 0) 
+					{
+						/* Let's look for the extension in our file */
+						for(e=0;e<example[list_menu+select_menu].howmuchext;e++)
 						{
-							present[1] = 1;
-							break;
+							if (strstr (ent->d_name, example[list_menu+select_menu].ext[e]) != NULL) 
+							{
+								present[1] = 1;
+								break;
+							}
 						}
 					}
 					
@@ -291,7 +309,7 @@ static void Controls_filebrowser()
 		if (button_state[i] == 2)
 		{
 			time_b[i]++;
-			if (time_b[i] > 4)
+			if (time_b[i] > 10)
 				state_b[i] = 1;
 		}
 		else
@@ -302,7 +320,7 @@ static void Controls_filebrowser()
 	}
 	
 	/* If Up button is pressed down... (or Left button held) */
-	if (button_state[0] == 1 || button_state[2] == 1 || state_b[0] == 1)
+	if (button_state[0] == 1 || state_b[0] == 1)
 	{
 		if (choice > 0) 
 		{
@@ -319,7 +337,7 @@ static void Controls_filebrowser()
 		}
 	}
 	/* If Down button is pressed down... (or Right button held) */
-	else if (button_state[1] == 1 || button_state[3] == 1 || state_b[1] == 1)
+	else if (button_state[1] == 1 || state_b[1] == 1)
 	{
 		/* Don't let the user to scroll more than there are files... */
 		if (fileid_selected < numb_files)
@@ -340,6 +358,30 @@ static void Controls_filebrowser()
 			}
 		}
 	}
+	
+	
+	/* If Up button is pressed down... (or Left button held) */
+	if (button_state[2] == 1)
+	{
+		if (scroll_choice > 0) 
+		{
+			scroll_choice -= 1;
+			refresh_cursor(3);
+			set_fileid();
+		}
+	}
+	/* If Down button is pressed down... (or Right button held) */
+	else if (button_state[3] == 1)
+	{
+		if (fileid_selected+(choice+10) < numb_files)
+		{
+			choice = 0;
+			scroll_choice += 1;
+			refresh_cursor(3);
+			set_fileid();
+		}
+	}
+	
 }
 
 
@@ -349,10 +391,16 @@ int32_t File_Browser_file(struct file_struct* example)
 	/* Buffer to hold =>the current directory */
 	int8_t buf[MAX_LENGH];
 	uint8_t result;
-	uint8_t file_chosen;
+	uint8_t file_chosen = 0;
 	
 	button_state[6] = 0;
 	button_state[8] = 0;
+	
+	/* Reset our current cursor position before using file browser */
+	choice = 0;
+	scroll_choice = 0;
+	set_fileid();
+	
 	refresh_cursor(3);
 	
 	while (button_state[6] < 1)

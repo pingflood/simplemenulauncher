@@ -77,7 +77,6 @@
 #define COLOR_INACTIVE_ITEM SDL_MapRGB(backbuffer->format,255,255,255)
 #define COLOR_SELECT       	SDL_MapRGB(backbuffer->format,0,0,255)
 
-
 struct file_struct
 {
 	uint8_t name[MAX_NAME_SIZE];
@@ -88,9 +87,17 @@ struct file_struct
 	uint8_t howmuchext;
 	uint8_t commandline[MAX_NAME_SIZE];
 	uint8_t icon_path[OUR_PATH_MAX];
+	uint8_t mnt_path[OUR_PATH_MAX];
 	uint8_t clock_speed[4];
 	uint16_t real_clock_speed;
 	SDL_Surface* icon;
+} ;
+
+struct settings
+{
+	uint8_t wallpaper_path[OUR_PATH_MAX];
+	uint8_t skin_path[OUR_PATH_MAX];
+	uint8_t skin_name[MAX_NAME_SIZE];
 } ;
 
 void init (void);
@@ -101,7 +108,6 @@ void draw_files_list();
 
 uint8_t is_folder(int8_t* str1);
 
-void goto_folder();
 void remove_file();
 uint8_t clear_dir(int8_t* which_dir);
 

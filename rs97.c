@@ -34,7 +34,7 @@ uint32_t backlight_v = 75;
 volatile uint32_t *memregs;
 
 /* Setting it at this value will check the battery right away upon boot up */
-static uint16_t check_battery = 1280;
+static uint16_t check_battery = 640;
 int8_t battery_level = 0;
 
 int16_t curMMCStatus, preMMCStatus;
@@ -80,15 +80,18 @@ static int32_t getBatteryStatus()
 
 static uint16_t getBatteryLevel() 
 {
-	int32_t val;
+	int32_t val, v;
 #ifdef RS97
-	/* If plugged to USB, then use charging icon */
-	if (getUDCStatus() == UDC_CONNECT) return 6;
-	
 	val = getBatteryStatus();
-	if (val > 4500) val = 4500;
-	else if (val < 0) val = 0;
-	return 5 - 5 * (4500 - val) / (4500 - 0);
+	/* Ranges from GMenuNext, thanks ! */
+	/* If it's within this range then it's charging via USB, use charging icon */
+	if ((val > 10000) || (val < 0)) return 6;
+    else if (val > 4000) return 5; // 100%
+    else if (val > 3900) return 4; // 80%
+    else if (val > 3800) return 3; // 60%
+    else if (val > 3730) return 2; // 40%
+    else if (val > 3600) return 1; // 20%
+    else return 5; // 0% :(
 #else
 	return 0;
 #endif
@@ -96,8 +99,9 @@ static uint16_t getBatteryLevel()
 
 void Battery_Status()
 {
+	uint16_t val;
 	check_battery++;
-	if (check_battery > 1280)
+	if (check_battery > 640)
 	{
 		check_battery = 0;
 		battery_level = getBatteryLevel();
@@ -111,7 +115,7 @@ void HW_Init()
 	uint32_t soundDev = open("/dev/mixer", O_RDWR);
 	int32_t vol = (100 << 8) | 100;
 	
-	/* Init memory registers */
+	/* Init memory registers, pretty much required for anthing RS-97 specific */
 	memdev = open("/dev/mem", O_RDWR);
 	if (memdev > 0) 
 	{
@@ -122,6 +126,8 @@ void HW_Init()
 			close(memdev);
 		}
 	}
+	
+	/* Setting Volume to max, that will avoid issues, i think */
 	ioctl(soundDev, SOUND_MIXER_WRITE_VOLUME, &vol);
 	close(soundDev);
 	
@@ -212,7 +218,7 @@ void USB_Mount()
 		 * */
 		system("umount -fl /dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3");
 		/* Sleep for a while then file checking it after unmounting both partitions */
-		system("sleep 1; /sbin/fsck -y $(readlink -f /dev/root | head -c -2)3");
+		system("sleep 1; /sbin/fsck -y /dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3");
 		
 		system("echo \"/dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3\" > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun0/file");
 		
@@ -227,7 +233,7 @@ void USB_Mount()
 		USB_Mount_Loop();
 		
 		/* File checking the internal sd card */
-		system("/sbin/fsck -y $(readlink -f /dev/root | head -c -2)3");
+		system("/sbin/fsck -y /dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3");
 		
 		system("echo '' > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun0/file");
 		/* Note the vfat, this means that if you use ext3, you need to recompile it from source again

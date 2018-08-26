@@ -3,6 +3,7 @@ Apricots Game
 /mnt/int_sd/games/apricots/run.dge
 n
 .wad
+/mnt
 #
 icons/apricots.png
 600
@@ -12,6 +13,7 @@ Arkanoid Game
 /mnt/int_sd/games/arkanoid/run.dge
 n
 .wad
+/mnt
 #
 icons/arkanoid.png
 600
@@ -21,6 +23,7 @@ Bermuda Syndrome Game
 /mnt/int_sd/games/bermuda/run.dge
 n
 .wad
+/mnt
 #
 icons/bermuda.png
 600
@@ -30,6 +33,7 @@ Boulder Game
 /mnt/int_sd/games/boulder/run.dge
 n
 .wad
+/mnt
 #
 icons/boulder.png
 600
@@ -39,6 +43,7 @@ BlockOut 2 Game
 /mnt/int_sd/games/blockout2/run.dge
 n
 .wad
+/mnt
 #
 icons/blockout2.png
 600
@@ -48,6 +53,7 @@ C-Dogs SDL Game
 /mnt/int_sd/games/cdogs/cdogs-sdl
 n
 .wad
+/mnt
 #
 icons/cdogs.png
 600
@@ -57,6 +63,7 @@ Outrun engine
 /mnt/int_sd/games/cannonball/run.dge
 n
 .wad
+/mnt
 #
 icons/cannonball.png
 600
@@ -66,6 +73,7 @@ English translation
 /mnt/int_sd/games/cavestory/run.dge
 n
 .wad
+/mnt
 #
 icons/cavestory.png
 600
@@ -75,6 +83,7 @@ Chinese translation
 /mnt/int_sd/games/cavestory_cn/run.dge
 n
 .wad
+/mnt
 #
 icons/cavestory.png
 600
@@ -84,6 +93,7 @@ TW translation
 /mnt/int_sd/games/cavestory_tw/run.dge
 n
 .wad
+/mnt
 #
 icons/cavestory.png
 600
@@ -93,6 +103,7 @@ Chroma Game
 /mnt/int_sd/games/chroma/run.dge
 n
 .wad
+/mnt
 #
 icons/chroma.png
 600
@@ -102,6 +113,7 @@ Chocolate Doom Game
 /mnt/int_sd/games/chocolate-doom/run.dge
 y
 .wad,.deh,.WAD,.DEH
+/mnt
 #
 icons/chocolate-doom.png
 600
@@ -111,6 +123,7 @@ Chocolate Heretic Game
 /mnt/int_sd/games/chocolate-heretic/run.dge
 y
 .wad,.deh,.WAD,.DEH
+/mnt
 #
 icons/chocolate-heretic.png
 600
@@ -120,6 +133,7 @@ Chocolate Hexen Game
 /mnt/int_sd/games/chocolate-hexen/run.dge
 y
 .wad,.deh,.WAD,.DEH
+/mnt
 #
 icons/chocolate-hexen.png
 600
@@ -129,6 +143,7 @@ Chocolate Strife Game
 /mnt/int_sd/games/chocolate-strife/run.dge
 y
 .wad,.deh,.WAD,.DEH
+/mnt
 #
 icons/chocolate-strife.png
 600
@@ -138,6 +153,7 @@ Dark Light game
 /mnt/int_sd/games/dlight/run.dge
 n
 .wad
+/mnt
 #
 icons/dlight.png
 600
@@ -147,6 +163,7 @@ Digger Game
 /mnt/int_sd/games/digger/run.dge
 n
 .wad
+/mnt
 #
 icons/digger.png
 600
@@ -156,6 +173,7 @@ Mr. Driller Game
 /mnt/int_sd/games/mrdrillux/run.dge
 n
 .wad
+/mnt
 #
 icons/mrdrillux.png
 600
@@ -165,6 +183,7 @@ Wolfenstein Game Engine
 /mnt/int_sd/games/ecwolf/run.dge
 y
 .wl1,.wl6,.sod,.wad,.grp,.zip,.7z,.exe,.WL1,.WL6,.SOD,.WAD,.GRP,.ZIP,.7Z,.EXE
+/mnt
 #
 icons/ecwolf.png
 600
@@ -174,6 +193,7 @@ EDuke32 Game
 /mnt/int_sd/games/eduke32/run.dge
 n
 .wad
+/mnt
 #
 icons/eduke32.png
 600
@@ -183,6 +203,7 @@ Falling Time Game
 /mnt/int_sd/games/fallingtime/run.dge
 n
 .wad
+/mnt
 #
 icons/fallingtime.png
 600
@@ -192,6 +213,7 @@ FreeBlocks Game
 /mnt/int_sd/games/freeblocks/freeblocks
 n
 .wad
+/mnt
 #
 icons/freeblocks.png
 600
@@ -201,6 +223,7 @@ Ganbare-Natsuki-San Game
 /mnt/int_sd/games/ganbare/run.dge
 n
 .wad
+/mnt
 #
 icons/ganbare.png
 600
@@ -210,6 +233,7 @@ Homing Fever Game
 /mnt/int_sd/games/homing/run.dge
 n
 .wad
+/mnt
 #
 icons/homing.png
 600
@@ -219,6 +243,7 @@ JinYong Legend Game
 /mnt/int_sd/games/jinyong_legend/run.dge
 n
 .wad
+/mnt
 #
 icons/jinyong.png
 600
@@ -228,6 +253,7 @@ JinYong PSP Game
 /mnt/int_sd/games/jinyong_psp/jysdllua
 n
 .wad
+/mnt
 #
 icons/jinyong_psp.png
 600
@@ -237,6 +263,7 @@ Just4QIX Game
 /mnt/int_sd/games/just4qix/run.dge
 n
 .wad
+/mnt
 #
 icons/just4qix.png
 600
@@ -246,6 +273,7 @@ KETM Game
 /mnt/int_sd/games/ketm/run.dge
 n
 .wad
+/mnt
 #
 icons/ketm.png
 600
@@ -255,6 +283,7 @@ The Last Mission Game
 /mnt/int_sd/games/lastmission/run.dge
 n
 .wad
+/mnt
 #
 icons/lastmission.png
 600
@@ -264,6 +293,7 @@ Meritous Game
 /mnt/int_sd/games/meritous/run.dge
 n
 .wad
+/mnt
 #
 icons/meritous.png
 600
@@ -273,6 +303,7 @@ Noiz2sa Game
 /mnt/int_sd/games/noiz2sa/noiz2sa.dge
 n
 .wad
+/mnt
 #
 icons/noiz2sa.png
 600
@@ -282,6 +313,7 @@ OpenTyrian Game
 /mnt/int_sd/games/opentyrian/opentyrian
 n
 .wad
+/mnt
 #
 icons/opentyrian.png
 600
@@ -291,6 +323,7 @@ Overheated Game
 /mnt/int_sd/games/overheated/run.dge
 n
 .wad
+/mnt
 #
 icons/overheated.png
 600
@@ -300,6 +333,7 @@ Pang Game
 /mnt/int_sd/games/pang/run.dge
 n
 .wad
+/mnt
 #
 icons/pang.png
 600
@@ -309,6 +343,7 @@ ProfaDeluxe Game
 /mnt/int_sd/games/profadeluxe/run.dge
 n
 .wad
+/mnt
 #
 icons/profadeluxe.png
 600
@@ -318,6 +353,7 @@ Puzzletube game
 /mnt/int_sd/games/puzzletube/run.dge
 n
 .wad
+/mnt
 #
 icons/puzzletube.png
 600
@@ -327,6 +363,7 @@ SDL Quake Game
 /mnt/int_sd/games/quake/sdlquake.dge
 n
 .wad
+/mnt
 #
 icons/quake.png
 600
@@ -336,6 +373,7 @@ Reminiscence Game
 /mnt/int_sd/games/reminiscence/rs
 n
 .wad
+/mnt
 #
 icons/reminiscence.png
 600
@@ -345,6 +383,7 @@ Rockbot Game
 /mnt/int_sd/games/rockbot/run.dge
 n
 .wad
+/mnt
 #
 icons/rockbot.png
 600
@@ -354,6 +393,7 @@ Rise Of The Triad SW Game
 /mnt/int_sd/games/rott/rott_sw
 n
 .wad
+/mnt
 #
 icons/ROTT.png
 600
@@ -363,6 +403,7 @@ Requires full version data
 /mnt/int_sd/games/rott/rott
 n
 .wad
+/mnt
 #
 icons/ROTT.png
 600
@@ -372,6 +413,7 @@ SDLPAL Game
 /mnt/int_sd/games/sdlpal/run.dge
 n
 .wad
+/mnt
 #
 icons/sdlpal.png
 600
@@ -381,6 +423,7 @@ SDLPAL MHV Game
 /mnt/int_sd/games/sdlpal_mhv/run.dge
 n
 .wad
+/mnt
 #
 icons/sdlpal_mhv.png
 600
@@ -390,6 +433,7 @@ Shifty Game
 /mnt/int_sd/games/shifty/run.dge
 n
 .wad
+/mnt
 #
 icons/shifty.png
 600
@@ -399,6 +443,7 @@ Shisen Seki Game
 /mnt/int_sd/games/shisen/run.dge
 n
 .wad
+/mnt
 #
 icons/shisen.png
 600
@@ -408,6 +453,7 @@ Snowman Game
 /mnt/int_sd/games/snowman/run.dge
 n
 .wad
+/mnt
 #
 icons/snowman.png
 600
@@ -417,6 +463,7 @@ SORR Game
 /mnt/int_sd/games/sorr/run.dge
 n
 .wad
+/mnt
 #
 icons/sorr.png
 600
@@ -426,6 +473,7 @@ Spartak Game
 /mnt/int_sd/games/spartak/run.dge
 n
 .wad
+/mnt
 #
 icons/spartak.png
 600
@@ -435,6 +483,7 @@ Spout Game
 /mnt/int_sd/games/spout/run.dge
 n
 .wad
+/mnt
 #
 icons/spout.png
 600
@@ -444,6 +493,7 @@ Super DMCA War Game
 /mnt/int_sd/games/smw/run.dge
 n
 .wad
+/mnt
 #
 icons/smw.png
 600
@@ -453,6 +503,7 @@ SuperTux Game
 /mnt/int_sd/games/supertux/run.dge
 n
 .wad
+/mnt
 #
 icons/supertux.png
 600
@@ -462,6 +513,7 @@ Super Transball 2 Game
 /mnt/int_sd/games/stransball2/run.dge
 n
 .wad
+/mnt
 #
 icons/stransball2.png
 600
@@ -471,6 +523,7 @@ Triple Trapled Game
 /mnt/int_sd/games/triple/run.dge
 n
 .wad
+/mnt
 #
 icons/triple.png
 600
@@ -480,6 +533,7 @@ Tileworld Game
 /mnt/int_sd/games/tileworld/tworld
 n
 .wad
+/mnt
 #
 icons/tworld.png
 600
@@ -489,6 +543,7 @@ Zelda Roth Game
 /mnt/int_sd/games/zelda_roth/run.dge
 n
 .wad
+/mnt
 #
 icons/zelda_roth.png
 600

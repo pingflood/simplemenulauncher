@@ -11,9 +11,6 @@ You can scroll through a list of files (taken from a text file) and execute them
 TODO
 ====
 
-- Fix wallpapers
-For some strange reasons, it will not print my string to the file ???
-
 - Favorite category (suggestions made by users)
 It will be another category, except that users can add entries to the favorite category via the GUI.
 

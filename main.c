@@ -59,6 +59,7 @@ static uint8_t select_cat = 0;
 
 struct settings mysettings;
 const uint8_t default_wallpaperpath[] = "gfx/background.bmp";
+uint8_t executable_directory[OUR_PATH_MAX];
 
 uint32_t loop(uint8_t* name, uint32_t position_file_byte)
 {
@@ -314,8 +315,7 @@ void Write_Settings(uint8_t category)
 	struct file_struct* example;
 	FILE* fp;
 	
-	/* HACK, we need to retrieve it from argv[0] instead */
-	chdir("/mnt/int_sd/apps/smenu");
+	HACK_CHDIR_MNT
 	
 	switch(category)
 	{
@@ -359,10 +359,11 @@ void Write_Settings(uint8_t category)
 void Write_AppSettings()
 {
 	FILE* fp;
+	HACK_CHDIR_MNT
 	fp = fopen("wallpaper.txt", "w");
 	if (fp)
 	{
-		fprintf(fp, " %s", mysettings.wallpaper_path);
+		fprintf(fp, "%s", mysettings.wallpaper_path);
 		fclose(fp);
 	}
 }
@@ -371,6 +372,7 @@ void Read_AppSettings()
 {
 	FILE* fp;
 	SDL_Surface* tmp;
+	HACK_CHDIR_MNT
 	fp = fopen("wallpaper.txt", "r");
 
 	if (fp)
@@ -586,6 +588,7 @@ int32_t GlobalSettings_screen()
 void Progress_RW(uint8_t mode)
 {
 	FILE* fp;
+	HACK_CHDIR_MNT
 	switch(mode)
 	{
 		/* Read progress from file */
@@ -779,7 +782,7 @@ void MenuBrowser()
 		{
 			/* User default user mount to /mnt */
 			#ifdef RS97
-			snprintf(currentdir, 512, "/mnt/");
+			snprintf(currentdir, OUR_PATH_MAX, "/mnt/");
 			chdir(currentdir);
 			#endif
 			/* Refresh again */
@@ -807,9 +810,8 @@ void MenuBrowser()
 	
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	SDL_Quit();
-	
-	/* Hack, we need to use the executable's directory (argv[0]) rather than that shit */
-	chdir("/mnt/int_sd/apps/smenu");
+
+	HACK_CHDIR_MNT
 	Progress_RW(1);
 	
 	HW_Deinit();
@@ -877,6 +879,9 @@ int32_t main(int32_t argc, int8_t* argv[])
 		printf("SAFE!\n");
 		return 0;
 	}
+	
+	/* Parse our executable's current directory to our buffer. We can't use argv[0] for that due to relative paths */
+	getcwd(executable_directory, sizeof(executable_directory));
 
 	/* Now, these environment variables are supposed to be set through sh.
 	 * But what happens if those lines get removed or are incorrectly modified ? Well you're screwed, simple.
@@ -943,7 +948,7 @@ int32_t main(int32_t argc, int8_t* argv[])
 	
 	USB_Mount();
 	
-	currentdir = getcwd(cwdbuf, 512);
+	currentdir = getcwd(cwdbuf, OUR_PATH_MAX);
 	
 	Progress_RW(0);
 

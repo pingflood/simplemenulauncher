@@ -8,6 +8,8 @@
 #define MAX_NAME_SIZE 64
 #define MAX_ELEMENTS 128
 
+#define HACK_CHDIR_MNT chdir(executable_directory);
+
 #define TITLE_WINDOW "Simple Menu Launcher"
 #define FORMAT_FILE ".elf"
 #define EXECUTABLE_NAME "filebrws.elf"

@@ -303,24 +303,9 @@ static void Controls_filebrowser()
 	static uint8_t state_b[2];
 	static uint8_t time_b[2];
 	uint8_t i;
-	
-	for(i=0;i<2;i++)
-	{
-		if (button_state[i] == 2)
-		{
-			time_b[i]++;
-			if (time_b[i] > 10)
-				state_b[i] = 1;
-		}
-		else
-		{
-			state_b[i] = 0;
-			time_b[i] = 0;
-		}
-	}
-	
+
 	/* If Up button is pressed down... (or Left button held) */
-	if (button_state[0] == 1 || state_b[0] == 1)
+	if (button_state[0] == 1)
 	{
 		if (choice > 0) 
 		{
@@ -337,7 +322,7 @@ static void Controls_filebrowser()
 		}
 	}
 	/* If Down button is pressed down... (or Right button held) */
-	else if (button_state[1] == 1 || state_b[1] == 1)
+	else if (button_state[1] == 1)
 	{
 		/* Don't let the user to scroll more than there are files... */
 		if (fileid_selected < numb_files)

@@ -844,9 +844,10 @@ void MenuBrowser()
 		case 1:
 			SetCPU(structure_file[select_menu+list_menu].real_clock_speed);
 			if (structure_file[select_menu+list_menu].commandline[0] == '#')
-				snprintf(temp_string, sizeof(temp_string), "\"%s\" \"%s\"", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline);
+				snprintf(temp_string, sizeof(temp_string), "%s", structure_file[select_menu+list_menu].executable_path);
 			else
-				snprintf(temp_string, sizeof(temp_string), "\"%s\"", structure_file[select_menu+list_menu].executable_path);
+				snprintf(temp_string, sizeof(temp_string), "%s \"%s\"", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline);
+				
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
 		/* Same, except that we also need to parse the additional file.
@@ -855,9 +856,9 @@ void MenuBrowser()
 		case 4:
 			SetCPU(structure_file[select_menu+list_menu].real_clock_speed);
 			if (structure_file[select_menu+list_menu].commandline[0] == '#')
-				snprintf(temp_string, sizeof(temp_string), "\"%s\" \"%s\"", structure_file[select_menu+list_menu].executable_path, additional_file);
+				snprintf(temp_string, sizeof(temp_string), "%s \"%s\"", structure_file[select_menu+list_menu].executable_path, additional_file);
 			else
-				snprintf(temp_string, sizeof(temp_string), "\"%s\" \"%s\" \"%s\"", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline, additional_file);
+				snprintf(temp_string, sizeof(temp_string), "%s \"%s\" \"%s\"", structure_file[select_menu+list_menu].executable_path, structure_file[select_menu+list_menu].commandline, additional_file);
 			execlp("/bin/sh", "/bin/sh", "-c", temp_string, NULL);
 		break;
 	}

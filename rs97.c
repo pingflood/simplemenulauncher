@@ -25,6 +25,12 @@
 #include "graphics.h"
 #include "rs97.h"
 
+//#define DETECT_MOUNT "$(readlink /dev/root | head -c -3 | tail -c 1)"
+#define DETECT_MOUNT "1"
+
+int8_t mount_point[64];
+int8_t cmd_sn[256];
+
 extern SDL_Surface *screen, *backbuffer, *img, *power_bmp, *usb_bmp[2], *battery_icon;
 
 /* RS-97 specific things */
@@ -86,11 +92,11 @@ static uint16_t getBatteryLevel()
 	/* Ranges from GMenuNext, thanks ! */
 	/* If it's within this range then it's charging via USB, use charging icon */
 	if ((val > 10000) || (val < 0)) return 6;
-    else if (val > 4000) return 5; // 100%
-    else if (val > 3900) return 4; // 80%
-    else if (val > 3800) return 3; // 60%
-    else if (val > 3730) return 2; // 40%
-    else if (val > 3600) return 1; // 20%
+    else if (val > 4000) return 0; // 100%
+    else if (val > 3900) return 1; // 80%
+    else if (val > 3800) return 2; // 60%
+    else if (val > 3730) return 3; // 40%
+    else if (val > 3600) return 4; // 20%
     else return 5; // 0% :(
 #else
 	return 0;
@@ -127,6 +133,19 @@ void HW_Init()
 		}
 	}
 	
+	if( access( "/dev/mmcblk0p4", F_OK ) != -1 ) 
+	{
+		/* Then assume external version */
+		printf("External version\n");
+		snprintf(mount_point, sizeof(mount_point), "/dev/mmcblk1p3");
+	} 
+	else 
+	{
+		/* We're using it over internal */
+		printf("Internal version\n");
+		snprintf(mount_point, sizeof(mount_point), "/dev/mmcblk0p3");
+	}
+	
 	/* Setting Volume to max, that will avoid issues, i think */
 	ioctl(soundDev, SOUND_MIXER_WRITE_VOLUME, &vol);
 	close(soundDev);
@@ -153,7 +172,7 @@ void Increase_Backlight()
 
 void mountSd()
 {
-	system("sleep 1; mount -t vfat -o rw,utf8 /dev/mmcblk$(( $(readlink /dev/root | head -c -3 | tail -c1) ^ 1 ))p1 /mnt/ext_sd");
+	system("sleep 1; mount -t vfat -o rw,utf8 /dev/mmcblk1p1 /mnt/ext_sd");
 }
 
 void umountSd()
@@ -216,35 +235,37 @@ void USB_Mount()
 		/* This part (taken from GMenuNext) will mount the internal sd card. p3 is the partition id
 		 * It used to be p4 on older releases and 97Next.
 		 * */
-		system("umount -fl /dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3");
-		/* Sleep for a while then file checking it after unmounting both partitions */
-		system("sleep 1; /sbin/fsck -y /dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3");
+		snprintf(cmd_sn, sizeof(cmd_sn), "umount -fl %s", mount_point);
+		system(cmd_sn);
 		
-		system("echo \"/dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3\" > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun0/file");
+		/* Sleep for a while then file checking it after unmounting both partitions */
+		snprintf(cmd_sn, sizeof(cmd_sn), "sleep 1; /sbin/fsck -y %s", mount_point);
+		system(cmd_sn);
+		
+		snprintf(cmd_sn, sizeof(cmd_sn), "echo \"%s\" > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun0/file", mount_point);
+		system(cmd_sn);
 		
 		if (getMMCStatus() == MMC_INSERT) 
 		{
 			umountSd();
-			system("echo '/dev/mmcblk$(( $(readlink /dev/root | head -c -3 | tail -c1) ^ 1 ))p1' > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun1/file");
-			/* File system external SD card only if it exists */
-			system("/sbin/fsck -y /dev/mmcblk$(( $(readlink /dev/root | head -c -3 | tail -c1) ^ 1 ))p1");
+			system("echo '/dev/mmcblk1p1 > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun1/file");
 		}
 		
 		USB_Mount_Loop();
 		
-		/* File checking the internal sd card */
-		system("/sbin/fsck -y /dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3");
+		/* Sleep for a while then file checking it after unmounting both partitions */
+		snprintf(cmd_sn, sizeof(cmd_sn), "sleep 1; /sbin/fsck -y %s", mount_point);
+		system(cmd_sn);
 		
 		system("echo '' > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun0/file");
 		/* Note the vfat, this means that if you use ext3, you need to recompile it from source again
 		 * Maybe i could allow setting this with an argv argument ?
 		 * */
-		system("mount /dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3 /mnt/int_sd -t vfat -o rw,utf8");
+		snprintf(cmd_sn, sizeof(cmd_sn), "mount %s /mnt/int_sd -t vfat -o rw,utf8", mount_point);
+		system(cmd_sn);
 		
 		if (getMMCStatus() == MMC_INSERT) 
 		{
-			/* Now file check the sd card after unmounting */
-			system("/sbin/fsck -y /dev/mmcblk$(( $(readlink /dev/root | head -c -3 | tail -c1) ^ 1 ))p1");
 			system("echo '' > /sys/devices/platform/musb_hdrc.0/gadget/gadget-lun1/file");
 			mountSd();
 		}
@@ -301,7 +322,8 @@ void TV_Out()
 void Unmount_all()
 {
 	umountSd();
-	system("umount -fl /dev/mmcblk$(readlink /dev/root | head -c -3 | tail -c 1)p3");
+	snprintf(cmd_sn, sizeof(cmd_sn), "umount -fl %s", mount_point);
+	system(cmd_sn);
 	system("echo 0 > /proc/jz/tvselect");
 	system("/sbin/swapoff -a");
 	system("sync; sync; sync");
